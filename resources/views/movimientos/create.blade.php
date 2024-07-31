@@ -1,189 +1,200 @@
-<!DOCTYPE html>
+
+    <!DOCTYPE html>
 <html lang="es">
 <head>
-    @php
-        $movimientosbasico = App\Models\Movimientosbasico::find($movimiento);
-        $caja = App\Models\Caja::find($caja);
+    
+@php
+        $movimientosbasico = App\Models\Movimientosbasico::find($movimiento->TipoMovimiento_id);
+        $caja = App\Models\Caja::find($movimiento->Caja_id);
         $parametizarcajas = App\Models\Parametizarcaja::where('caja_id', $caja->id)
                       ->where('estado', 'Activo')
                       ->get();
     @endphp
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interfaz de Ventas</title>
+    <title>Sistema de Ventas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body, html {
-            height: 100%;
-            background-color: #fff;
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --background-color: #ecf0f1;
+            --text-color: #34495e;
         }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
         .container-fluid {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+            padding: 20px;
         }
+
         .header {
-            background-color: #f0f0f0;
-            border-bottom: 1px solid #F5A872;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        .header-item {
-            border: 1px solid #F5A872;
-            background-color: #fff;
-        }
+
         .logo {
             font-size: 24px;
-            color: #7E6AAF;
-        }
-        .codigo-input {
-            border: 1px solid #F5A872;
-        }
-        .table-container {
-            flex-grow: 1;
-            overflow: auto;
-        }
-        .table thead th {
-            background-color: #64C195;
-            color: white;
-        }
-        .footer {
-            background-color: #eae6f5;
-            border-top: 1px solid #F5A872;
-        }
-        .total-section {
-            background-color: #7E6AAF;
-            color: white;
-        }
-        .date-label {
-            background-color: #fff;
-            border: 1px solid #F5A872;
-            font-size: 0.8rem;
-        }
-        .number-label {
-            background-color: #7E6AAF;
-            color: white;
-            font-size: 1.5rem;
             font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .date-box {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .product-table {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .footer {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .total-section {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
         }
     </style>
 </head>
 <body>
-    <div class="container-fluid p-0">
-        <div class="header py-2">
-            <div class="row mx-0">
-                <div class="col-md-8">
-                    <div class="header-item mb-2 p-2">
-                        <img src="{{asset('../resources/img/user.png')}}" width="50" height="50" alt="User" class="me-2">
-                        <span class="fw-bold">CONSUMIDOR FINAL</span>
-                    </div>
-                    @if ( $movimientosbasico->OrigenBodega=="1" || $movimientosbasico->DestinoBodega=="1" )
-                    <div class="header-item mb-2 p-2">
-                        @if ($movimientosbasico->OrigenBodega=="1")
-                            <label class="me-2">Origen:</label>
-                            <select name="OrigenBodega_id" class="form-select form-select-sm d-inline-block w-auto" id="OrigenBodega_id">
-                                <option value="">Seleccionar</option>
-                                @foreach ($parametizarcajas as $parametizarcaja)
-                                    <option value="{{$parametizarcaja->bodegad_id}}">{{$parametizarcaja->bodega->Descripcion}}</option> 
-                                @endforeach
-                            </select>
-                        @endif
-                        @if ($movimientosbasico->DestinoBodega=="1")
-                            <label class="ms-3 me-2">Destino:</label>
-                            <select name="DestinoBodega_id" class="form-select form-select-sm d-inline-block w-auto" id="DestinoBodega_id">
-                                <option value="">Seleccionar</option>
-                                @foreach ($parametizarcajas as $parametizarcaja)
-                                    <option value="{{$parametizarcaja->bodegad_id}}">{{$parametizarcaja->bodega->Descripcion}}</option> 
-                                @endforeach
-                            </select>
-                        @endif
-                    </div>
-                    @endif
-                    
-                    <div class="header-item p-2">
-                        @if ($movimientosbasico->OrigenBodega=="1")
-                            <label class="me-2">Proveedor:</label>
-                            <input type="text" name="OrigenProveedor_id"  style="display: none" id="OrigenProveedor_id">
-                            <input type="text" name="proveedorBuscar"  class="form-control form-control-sm d-inline-block w-auto" id="OrigenProveedor_id">
-                        @endif
-                        @if ($movimientosbasico->DestinoBodega=="1")
-                            <label class="ms-3 me-2">Usuario:</label>
-                            <input type="text" style="display: none" name="UsuarioDestino_id" id="UsuarioDestino_id">
-                            <input type="text"  class="form-control form-control-sm d-inline-block w-auto" id="usuariosBuscar">
-                        @endif
+    <div class="container-fluid">
+        <div class="header">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="logo">
+                        <i class="fas fa-store"></i> Sistema de Ventas
                     </div>
                 </div>
-                <div class="col-md-4 text-end">
-                    <div class="date-label d-inline-block p-2">
-                        <div id="currentDate"></div>
-                        <div class="number-label p-2 mt-1 rounded">0{{$caja->id}}</div>
+                <div class="col-md-3">
+                    <div class="date-box">
+                        <i class="far fa-calendar-alt"></i>
+                        <span id="currentDate"></span>
                     </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="date-box">
+                        <i class="fas fa-cash-register"></i>
+                        Caja: 0{{ $caja->id }}
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <input type="text" class="form-control" placeholder="Buscar cliente...">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="OrigenBodega_id">
+                        <option value="">Seleccionar origen</option>
+                        @foreach ($parametizarcajas as $parametizarcaja)
+                            <option value="{{ $parametizarcaja->bodegad_id }}">{{ $parametizarcaja->bodega->Descripcion }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="DestinoBodega_id">
+                        <option value="">Seleccionar destino</option>
+                        @foreach ($parametizarcajas as $parametizarcaja)
+                            <option value="{{ $parametizarcaja->bodegad_id }}">{{ $parametizarcaja->bodega->Descripcion }}</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
         </div>
 
-        <input type="text" class="form-control codigo-input my-3" placeholder="Codigo">
-
-        <div class="table-container px-3">
+        <div class="product-table">
+            <div class="mb-3">
+                <input type="text" class="form-control" placeholder="Buscar producto por código o nombre...">
+            </div>
             <table id="ventasTable" class="table table-striped">
                 <thead>
                     <tr>
-                        <th>CODIGO</th>
-                        <th>DESCRIPCION</th>
-                        <th>CANT</th>
-                        <th>PRECIO</th>
-                        <th>TOTAL</th>
+                        <th>Código</th>
+                        <th>Descripción</th>
+                        <th>Cantidad</th>
+                        <th>Precio</th>
+                        <th>Total</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Las filas de la tabla se llenarán dinámicamente con JavaScript -->
+                    <!-- Las filas se llenarán dinámicamente con JavaScript -->
                 </tbody>
             </table>
         </div>
 
-        <div class="footer p-2">
-            <div class="row">
-                <div class="col-md-3">Filas: 0</div>
-                <div class="col-md-3">Unidades: 0</div>
-                <div class="col-md-3">Puntos: 0</div>
-                <div class="col-md-3">Peso / Kg: 0</div>
+        <div class="footer">
+            <div class="row text-center">
+                <div class="col-md-3">
+                    <i class="fas fa-list"></i> Filas: <span id="rowCount">0</span>
+                </div>
+                <div class="col-md-3">
+                    <i class="fas fa-box"></i> Unidades: <span id="unitCount">0</span>
+                </div>
+                <div class="col-md-3">
+                    <i class="fas fa-star"></i> Puntos: <span id="pointCount">0</span>
+                </div>
+                <div class="col-md-3">
+                    <i class="fas fa-weight"></i> Peso / Kg: <span id="weightCount">0</span>
+                </div>
             </div>
         </div>
 
-        <div class="total-section p-2">
+        <div class="total-section mt-3">
             <div class="row">
                 <div class="col-6">Total</div>
-                <div class="col-6 text-end" id="grandTotal">0</div>
+                <div class="col-6 text-end" id="grandTotal">$0.00</div>
             </div>
         </div>
     </div>
-    <script>var CSRF = '{{ csrf_token() }}';</script>
-    @include('movimientos.usuarios')
-    @include('movimientos.proveedor')
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
     <script>
-        
-        // Inicializar DataTable
-        $(document).ready(function() {
-            $('#ventasTable').DataTable({
-                "paging": true,
-                "searching": true,
-                "info": false,
-                "responsive": true
-            });
-        });
-
-        // Función para actualizar la fecha actual
         function updateDate() {
             const date = new Date();
             const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
             document.getElementById('currentDate').textContent = date.toLocaleDateString('es-ES', options).replace(',', ' -');
         }
 
-        // Llama a la función al cargar la página
         updateDate();
+        setInterval(updateDate, 60000);  // Actualizar cada minuto
+
+        // Aquí irían las funciones para manejar la tabla de productos, cálculos, etc.
     </script>
 </body>
 </html>

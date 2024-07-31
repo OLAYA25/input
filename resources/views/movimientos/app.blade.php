@@ -85,11 +85,60 @@
                     <div class="computer-grid">
                         @foreach($computers as $index => $computer)
                             <div class="computer-box">
-                                <a href="#" onclick="valurComputador({{ $computer['id'] }})"  data-toggle="modal" data-target="#exampleModal">
+                                <a href="#" onclick="valurComputador({{ $computer['id'] }})"  data-toggle="modal" data-target="#Modal{{ $computer['id'] }}">
                                     <i class="demo-pli-monitor-2"></i>
                                     <p>{{ $computer['Descripcion'] }}</p>
                                 </a>
                             </div>
+                            
+                            <!-- Modal -->
+                            <div class="modal fade" id="Modal{{ $computer['id'] }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Tipos Movimientos</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th>
+                                                        Tipos Movimientos
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        @foreach ($Operaciones as $movimiento)
+                                                        <form action="{{ route('movimientos.crearPendientes', [
+                                                            'users' => Auth::user()->id,
+                                                            'caja' => $computer['id'],
+                                                            'TipoMovimiento' => $movimiento->id
+                                                        ]) }}" method="POST">
+                                                            @csrf
+                                                            <!-- Include other form fields as needed -->
+                                                            <button type="submit">{{$movimiento->Descripcion}}</button>
+                                                        @endforeach
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        
+                                    </div>
+                                    <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                    
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+
+ 
+
                         @endforeach
                     </div>
                 </div>
@@ -110,59 +159,5 @@
         });
     });
 </script>
-
-<!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Tipos Movimientos</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-            <table>
-                <thead>
-                    <tr>
-                        <th>
-                            Tipos Movimientos
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>
-                            @foreach ($Operaciones as $movimiento)
-                                <li><a onclick="irrul({{$movimiento->id}})" href="#">{{$movimiento->Descripcion}}</a></li>
-                            @endforeach
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-         
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    var computador;
-
-    function valurComputador(params) {
-        computador=params;
-
-    }
-    
-
-    function irrul(movimientos) {
-       window.location.href = " ../movimientos/index/"+computador+"/"+movimientos+"";
-       
-    }
-  </script>
 
 @endsection

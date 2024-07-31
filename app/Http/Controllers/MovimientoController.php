@@ -29,12 +29,26 @@ class MovimientoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function crearPendientes( $users ,$caja ,$TipoMovimiento)
+    {
+        $movimiento = Movimiento::create( [
+            'TipoMovimiento_id'=>$TipoMovimiento,
+            'users_id'=>$users ,
+            'Caja_id'=>$caja,
+            'estado'=>'Pendiente',
+        ]);
+        $movimiento->save();
+
+        return view('movimientos.create', compact('movimiento'));
+
+    }
+
     public function create()
     {
         $movimiento = new Movimiento();
         return view('movimiento.create', compact('movimiento'));
     }
-
+   
     /**
      * Store a newly created resource in storage.
      *

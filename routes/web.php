@@ -24,6 +24,8 @@ Route::get('movimientos/index/{caja}/{movimiento}', function ($caja,$movimiento)
 });
 
 Auth::routes();
+
+Route::post('movimientos/crearPendientes/{users}/{caja}/{TipoMovimiento}', [App\Http\Controllers\MovimientoController::class, 'crearPendientes'])->name('movimientos.crearPendientes');
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::resource('codigoalternos',App\Http\Controllers\CodigoalternoController::class);
 Route::resource('codigos',App\Http\Controllers\CodigoController::class);

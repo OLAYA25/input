@@ -62,7 +62,7 @@ class Movimiento extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
-    public function bodega()
+    public function bodegas()
     {
         return $this->hasOne('App\Models\Bodega', 'id', 'DestinoBodega_id');
     }
@@ -118,7 +118,7 @@ class Movimiento extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
-    public function usuariobasico()
+    public function usuariobasicos()
     {
         return $this->hasOne('App\Models\Usuariobasico', 'id', 'OrigenProveedor_id');
     }
