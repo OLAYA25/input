@@ -35,6 +35,35 @@ class ProveedoreController extends Controller
         return view('proveedore.create', compact('proveedore'));
     }
 
+    public function BuscarProveedor(Request $request)
+    {
+        $term = $request->input('term');
+        
+        $query = Proveedore::query();
+    
+        if (strlen($term) > 0) {
+            if ($term[0] === '@') {
+                // Buscar por nombre de producto
+                $productName = substr($term, 1);
+                $query->where('RazonSocial', 'LIKE', "%$productName%");
+            } elseif ($term[0] === '#') {
+                // Buscar por ID
+                $id = substr($term, 1);
+                $query->where('NumeroDocumento', $id);
+            } else {
+                // Búsqueda general en múltiples campos
+                $query->where(function ($q) use ($term) {
+                    $q->where('RazonSocial', 'LIKE', "%$term%")
+                      ->orWhere('NumeroDocumento', 'LIKE', "%$term%");
+                    
+                });
+            }
+        }
+    
+        $productos = $query->get();
+        
+        return response()->json($productos);
+    }
     /**
      * Store a newly created resource in storage.
      *

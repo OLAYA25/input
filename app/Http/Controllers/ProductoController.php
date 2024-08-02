@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Producto;
+use App\Models\Codigoalterno;
 use Illuminate\Http\Request;
 
 /**
@@ -23,6 +24,20 @@ class ProductoController extends Controller
         return view('producto.index', compact('productos'))
             ->with('i', (request()->input('page', 1) - 1) * $productos->perPage());
     }
+
+    public function buscar(Request $request)
+{
+    $termino = $request->input('term');
+
+    $productos = Codigoalterno::where('Descripcion', 'LIKE', "%$termino%")
+        ->orWhereHas('producto', function($query) use ($termino) {
+            $query->where('Descripcion', 'LIKE', "%$termino%")
+                  ->orWhere('NumeroSerial', 'LIKE', "%$termino%");
+        })
+        ->get();
+
+    return response()->json($productos);
+}
 
     /**
      * Show the form for creating a new resource.

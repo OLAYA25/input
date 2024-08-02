@@ -25,6 +25,14 @@ class UsuariobasicoController extends Controller
             ->with('i', (request()->input('page', 1) - 1) * $usuariobasicos->perPage());
     }
 
+    public function buscar(Request $request)
+    {
+        $termino = $request->input('term');
+        $clientes = Usuariobasico::where('Nombre1', 'LIKE', "%$termino%")
+                           ->orWhere('NDocumento', 'LIKE', "%$termino%")
+                           ->get();
+        return response()->json($clientes);
+    }
     /**
      * Show the form for creating a new resource.
      *

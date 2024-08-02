@@ -23,7 +23,11 @@ Route::get('movimientos/index/{caja}/{movimiento}', function ($caja,$movimiento)
     return view('movimientos.create')->with(compact('caja','movimiento'));
 });
 
+
 Auth::routes();
+Route::get('/proveedores/BuscarProveedor', [App\Http\Controllers\ProveedoreController::class, 'BuscarProveedor'])->name('proveedor.BuscarProveedor');
+Route::get('/buscar-cliente', [App\Http\Controllers\UsuariobasicoController::class, 'buscar'])->name('cliente.buscar');
+Route::get('/buscar-producto', [App\Http\Controllers\ProductoController::class, 'buscar'])->name('producto.buscar');
 
 Route::post('movimientos/crearPendientes/{users}/{caja}/{TipoMovimiento}', [App\Http\Controllers\MovimientoController::class, 'crearPendientes'])->name('movimientos.crearPendientes');
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
