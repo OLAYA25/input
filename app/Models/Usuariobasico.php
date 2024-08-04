@@ -63,10 +63,7 @@ class Usuariobasico extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function movimientos()
-    {
-        return $this->hasMany('App\Models\Movimiento', 'usuariobasico_id', 'id');
-    }
+
     
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

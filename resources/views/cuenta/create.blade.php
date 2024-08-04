@@ -13,9 +13,9 @@
 
                 <div class="card card-default">
                     <div class="card-header">
-                        <h3 class="card-title">{{ __('Crear') }} Cuenta</h3>
+                        <span class="card-title">{{ __('Create') }} Cuenta</span>
                     </div>
-                    <div class="panel-body">
+                    <div class="card-body">
                         <form method="POST" action="{{ route('cuentas.store') }}"  role="form" enctype="multipart/form-data">
                             @csrf
 

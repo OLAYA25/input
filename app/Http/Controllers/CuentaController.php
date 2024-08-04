@@ -51,6 +51,17 @@ class CuentaController extends Controller
             ->with('success', 'Cuenta created successfully.');
     }
 
+
+    public function buscar(Request $request)
+    {
+        $termino = $request->input('term');
+    
+        $cuentas = Cuenta::where('descripcion', 'LIKE', "%$termino%") // Carga la relación 'producto'
+            ->get();
+    
+        return response()->json($cuentas);
+    }
+
     /**
      * Display the specified resource.
      *

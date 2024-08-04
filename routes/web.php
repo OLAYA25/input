@@ -28,8 +28,9 @@ Auth::routes();
 Route::get('/proveedores/BuscarProveedor', [App\Http\Controllers\ProveedoreController::class, 'BuscarProveedor'])->name('proveedor.BuscarProveedor');
 Route::get('/buscar-cliente', [App\Http\Controllers\UsuariobasicoController::class, 'buscar'])->name('cliente.buscar');
 Route::get('/buscar-producto', [App\Http\Controllers\ProductoController::class, 'buscar'])->name('producto.buscar');
-Route::post('MovimientosDetallados/crearPendientes', [App\Http\Controllers\MovimientoController::class, 'CrearMovimientosDetalle'])->name('movimientos.CrearMovimientosDetalle');
+Route::get('/buscar-cuenta', [App\Http\Controllers\CuentaController::class, 'buscar'])->name('cuenta.buscar');
 
+Route::post('MovimientosDetallados/crearPendientes', [App\Http\Controllers\MovimientoController::class, 'CrearMovimientosDetalle'])->name('movimientos.CrearMovimientosDetalle');
 
 Route::post('movimientos/crearPendientes/{users}/{caja}/{TipoMovimiento}', [App\Http\Controllers\MovimientoController::class, 'crearPendientes'])->name('movimientos.crearPendientes');
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

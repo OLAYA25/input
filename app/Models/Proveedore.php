@@ -52,4 +52,8 @@ class Proveedore extends Model
     }
     
 
+    public function movimientos()
+    {
+        return $this->hasMany('App\Models\Proveedore', 'OrigenProveedor_id', 'id');
+    }
 }

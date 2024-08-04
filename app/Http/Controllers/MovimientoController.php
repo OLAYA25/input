@@ -26,25 +26,9 @@ class MovimientoController extends Controller
 
     public function CrearMovimientosDetalle(Request $request)
         {
-            // Valida los datos de entrada si es necesario
-            $request->validate([
-                'users' => 'required|integer', // Ajusta las reglas de validación según sea necesario
-                'caja' => 'required|integer',
-                'TipoMovimiento' => 'required|integer',
-            ]);
-
-            // Accede a los datos enviados en el cuerpo de la solicitud
-            $users = $request->input('users');
-            $caja = $request->input('caja');
-            $TipoMovimiento = $request->input('TipoMovimiento');
-
+         
             // Crea el movimiento
-            $movimiento = Movimiento::create([
-                'TipoMovimiento_id' => $TipoMovimiento,
-                'users_id' => $users,
-                'Caja_id' => $caja,
-                'estado' => 'Pendiente',
-            ]);
+            $movimiento = Movimiento::create($request->all());
 
             // Guarda el movimiento y devuelve una respuesta JSON
             return response()->json($movimiento);

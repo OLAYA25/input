@@ -109,6 +109,10 @@
                 <div class="col-md-6">
                     <div class="logo">
                         <i class="fas fa-store"></i> Sistema de Ventas
+                        <a class=" fas fa-cash-register" href="#" id="Caja">   </a>
+                        <a class=" fas fa-wallet" href="#" id="OCaja">   </a>
+                        <input type="text" id='CajaInput' style='display:none'>
+                        <input type="text" id='CajaOnput' style='display:none'>
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -127,10 +131,12 @@
             <div class="row mt-3">
                 <div class="col-md-3">
                     <label for="buscarProveedor">Proveedor</label>
+                    <input type="text" id="Proveedor" class="form-control" style='display:none'>
                     <input type="text" id="buscarProveedor" class="form-control" placeholder="Buscar Proveedor..." readonly>
                 </div>
                 <div class="col-md-3">
                     <label for="buscarCliente">Usuario</label>
+                    <input type="text" id="Users" class="form-control" style='display:none'>
                     <input type="text" id="buscarCliente" class="form-control" placeholder="Buscar cliente..." readonly>    
                 </div>
                 <div class="col-md-3">
@@ -141,9 +147,11 @@
                             <option value="{{ $parametizarcaja->bodegad_id }}">{{ $parametizarcaja->bodega->Descripcion }}</option>
                         @endforeach
                     </select>
+                    <input type="text" id="BodegaOrigen" class="form-control" style='display:none'>
                 </div>
                 <div class="col-md-3">
                     <label for="DestinoBodega_id">Bodega Destino</label>
+                    <input type="text" id="BodegaDestino" class="form-control" style='display:none'>
                     <select class="form-select" id="DestinoBodega_id">
                         <option value="">Seleccionar destino</option>
                         @foreach ($parametizarcajas as $parametizarcaja)
@@ -220,7 +228,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script>
-     $(document).ready(function() {
+$(document).ready(function() {
     let Movimientos = null;
     const searchModal = new bootstrap.Modal(document.getElementById('searchModal'));
     let currentSearchType = '';
@@ -228,13 +236,44 @@
     // Funciones de búsqueda y modal
     function openSearchModal(type) {
         currentSearchType = type;
-        $('#searchModalLabel').text('Buscar ' + (type === 'cliente' ? 'Cliente' : 'Proveedor'));
-        $('#searchModalInput').val('').attr('placeholder', 'Ingrese nombre o ID de ' + type);
+        let labelText, placeholderText;
+        switch(type) {
+            case 'cliente':
+                labelText = 'Cliente';
+                placeholderText = 'Ingrese nombre o ID de cliente';
+                break;
+            case 'proveedor':
+                labelText = 'Proveedor';
+                placeholderText = 'Ingrese nombre o ID de proveedor';
+                break;
+            case 'caja':
+                labelText = 'Caja';
+                placeholderText = 'Ingrese nombre o ID de caja';
+                break;
+            case 'ocaja':
+                labelText = 'OCaja';
+                placeholderText = 'Ingrese nombre o ID de OCaja';
+                break;
+            default:
+                labelText = 'Bodega';
+                placeholderText = 'Ingrese nombre o ID de bodega';
+                break;
+        }
+        $('#searchModalLabel').text('Buscar ' + labelText);
+        $('#searchModalInput').val('').attr('placeholder', placeholderText);
+        $('#searchResults').empty(); // Limpiar resultados anteriores
         searchModal.show();
     }
 
-    $('#buscarCliente, #buscarProveedor').on('click focus', function() {
-        const type = this.id.replace('buscar', '').toLowerCase();
+    $('#OrigenBodega_id, #DestinoBodega_id').on('change', function() {
+        var origenValue = $('#OrigenBodega_id').val();
+        var destinoValue = $('#DestinoBodega_id').val();
+        $('#BodegaOrigen').val(origenValue);
+        $('#BodegaDestino').val(destinoValue);
+    });
+
+    $('#buscarCliente, #buscarProveedor, #Caja, #OCaja').on('click focus', function() {
+        const type = this.id.replace('buscar', '').toLowerCase().replace('_id', '');
         openSearchModal(type);
     });
 
@@ -244,9 +283,21 @@
     });
 
     function buscar(termino) {
-        const url = currentSearchType === 'cliente' 
-            ? '{{ route("cliente.buscar") }}'
-            : '{{ route("proveedor.BuscarProveedor") }}';
+        let url;
+        switch(currentSearchType) {
+            case 'cliente':
+                url = '{{ route("cliente.buscar") }}';
+                break;
+            case 'proveedor':
+                url = '{{ route("proveedor.BuscarProveedor") }}';
+                break;
+            case 'caja':
+                url = '{{ route("cuenta.buscar") }}';
+                break;
+            case 'ocaja':
+                url = '{{ route("cuenta.buscar") }}';
+                break;
+        }
         
         $.ajax({
             url: url,
@@ -259,7 +310,7 @@
 
     function mostrarResultados(resultados) {
         const html = resultados.map(item => 
-            `<div class="search-item" data-id="${item.id}">
+            `<div class="search-item" data-id="${item.id}" data-nombre="${item.RazonSocial || item.Nombre || item.Descripcion}">
                 ${item.RazonSocial || item.Nombre || item.Descripcion} - ${item.NumeroDocumento || item.Codigo}
             </div>`
         ).join('');
@@ -268,8 +319,34 @@
 
     $(document).on('click', '.search-item', function() {
         const id = $(this).data('id');
-        const nombre = $(this).text();
-        $(`#buscar${currentSearchType.charAt(0).toUpperCase() + currentSearchType.slice(1)}`).val(nombre);
+        const nombre = $(this).data('nombre');
+        let inputId, hiddenInputId;
+
+        switch(currentSearchType) {
+            case 'cliente':
+                inputId = '#buscarCliente';
+                hiddenInputId = '#Users';
+                break;
+            case 'proveedor':
+                inputId = '#buscarProveedor';
+                hiddenInputId = '#Proveedor';
+                break;
+            case 'caja':
+                inputId = '#Caja';
+                hiddenInputId = '#CajaInput';
+                break;
+            case 'ocaja':
+                inputId = '#OCaja';
+                hiddenInputId = '#CajaOnput';
+                break;
+            default:
+                inputId = '#buscarBodega';
+                hiddenInputId = '#Bodega';
+                break;
+        }
+
+        $(inputId).val(nombre);
+        $(hiddenInputId).val(id);
         searchModal.hide();
     });
 
@@ -305,6 +382,7 @@
         },
         select: function(event, ui) {
             agregarProducto(ui.item).catch(error => console.error('Error al agregar producto:', error));
+            $(this).val(''); // Limpiar el campo después de seleccionar
             return false;
         }
     });
@@ -324,10 +402,29 @@
     // Funciones de manejo de movimientos y productos
     function CrearDetalle() {
         return new Promise((resolve, reject) => {
+            const origenBodega = $('#BodegaOrigen').val();
+            const proveedor = $('#Proveedor').val();
+            const usuarioDestino = $('#Users').val();
+            const destinoBodega = $('#BodegaDestino').val();
+            const CuentaEn = $('#CajaInput').val();
+            const CuentaSL = $('#CajaOnput').val();
+            console.log('OrigenBodega_id:', origenBodega);
+            console.log('OrigenProveedor_id:', proveedor);
+            console.log('UsuarioDestino_id:', usuarioDestino);
+            console.log('DestinoBodega_id:', destinoBodega);
+            console.log('DestinoBodega_id:', CuentaSL);
+            console.log('DestinoBodega_id:', CuentaEn);
             const data = {
-                users: {{$users}},
-                caja: {{$caja->id}},
-                TipoMovimiento: {{$TipoMovimiento}}
+                users_id: '{{$users}}',
+                Caja_id: '{{$caja->id}}',
+                TipoMovimiento_id: '{{$TipoMovimiento}}',
+                OrigenBodega_id: origenBodega,
+                Cuenta_Salida :CuentaSL,
+                Cuenta_Entrada :CuentaEn,
+                OrigenProveedor_id: proveedor,
+                UsuarioDestino_id: usuarioDestino,
+                DestinoBodega_id: destinoBodega,
+                estado: 'Pendiente'
             };
 
             fetch('{{Route("movimientos.CrearMovimientosDetalle")}}', {
@@ -405,7 +502,7 @@
     $(document).on('input', '.cantidad', function() {
         const row = $(this).closest('tr');
         const cantidad = $(this).val();
-        const precio = row.find('td:eq(3)').text();
+        const precio = parseFloat(row.find('td:eq(3)').text());
         const total = cantidad * precio;
         row.find('.total').text(total.toFixed(2));
         actualizarTotales();
@@ -430,6 +527,8 @@
         $('#grandTotal').text('$' + totalGeneral.toFixed(2));
     }
 });
+
+  
     </script>
 </body>
 </html>

@@ -25,6 +25,10 @@
                             {{ $cuenta->bancos_id }}
                         </div>
                         <div class="form-group">
+                            <strong>Usuario Id:</strong>
+                            {{ $cuenta->usuario_id }}
+                        </div>
+                        <div class="form-group">
                             <strong>Descripcion:</strong>
                             {{ $cuenta->descripcion }}
                         </div>

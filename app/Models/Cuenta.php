@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @property $id
  * @property $bancos_id
+ * @property $usuario_id
  * @property $descripcion
  * @property $tipo
  * @property $numero
@@ -17,7 +18,12 @@ use Illuminate\Database\Eloquent\Model;
  * @property $updated_at
  *
  * @property Banco $banco
+ * @property Movimiento[] $movimientos
+ * @property Movimiento[] $movimientos
+ * @property Movimiento[] $movimientos
  * @property Parametizarcaja[] $parametizarcajas
+ * @property Parametizarcaja[] $parametizarcajas
+ * @property Usuariobasico $usuariobasico
  * @package App
  * @mixin \Illuminate\Database\Eloquent\Builder
  */
@@ -34,7 +40,7 @@ class Cuenta extends Model
      *
      * @var array
      */
-    protected $fillable = ['bancos_id','descripcion','tipo','numero','estado'];
+    protected $fillable = ['bancos_id','usuario_id','descripcion','tipo','numero','estado'];
 
 
     /**
@@ -48,9 +54,49 @@ class Cuenta extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
+    public function movimientos()
+    {
+        return $this->hasMany('App\Models\Movimiento', 'Cuenta_Entrada', 'id');
+    }
+    
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function movimientosE()
+    {
+        return $this->hasMany('App\Models\Movimiento', 'Cuenta_id', 'id');
+    }
+    
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function movimientosS()
+    {
+        return $this->hasMany('App\Models\Movimiento', 'Cuenta_Salida', 'id');
+    }
+    
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function parametizarcajas()
     {
         return $this->hasMany('App\Models\Parametizarcaja', 'cuentas_id', 'id');
+    }
+    
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function parametizarcajasE()
+    {
+        return $this->hasMany('App\Models\Parametizarcaja', 'cuentas_egre', 'id');
+    }
+    
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function usuariobasico()
+    {
+        return $this->hasOne('App\Models\Usuariobasico', 'id', 'usuario_id');
     }
     
 
