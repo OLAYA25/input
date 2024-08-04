@@ -26,18 +26,19 @@ class ProductoController extends Controller
     }
 
     public function buscar(Request $request)
-{
-    $termino = $request->input('term');
-
-    $productos = Codigoalterno::where('Descripcion', 'LIKE', "%$termino%")
-        ->orWhereHas('producto', function($query) use ($termino) {
-            $query->where('Descripcion', 'LIKE', "%$termino%")
-                  ->orWhere('NumeroSerial', 'LIKE', "%$termino%");
-        })
-        ->get();
-
-    return response()->json($productos);
-}
+    {
+        $termino = $request->input('term');
+    
+        $productos = Codigoalterno::where('Descripcion', 'LIKE', "%$termino%")
+            ->orWhereHas('producto', function($query) use ($termino) {
+                $query->where('Descripcion', 'LIKE', "%$termino%")
+                      ->orWhere('NumeroSerial', 'LIKE', "%$termino%");
+            })
+            ->with(['producto.actualizarprecios']) // Carga la relación 'producto'
+            ->get();
+    
+        return response()->json($productos);
+    }
 
     /**
      * Show the form for creating a new resource.

@@ -57,5 +57,10 @@ class Movimientosdatallado extends Model
         return $this->hasOne('App\Models\Movimiento', 'id', 'Movimientos_id');
     }
     
+    public function productos()
+    {
+        return $this->hasOne('App\Models\Producto', 'id', 'Impuesto_id');
+    }
+    
 
 }

@@ -24,6 +24,31 @@ class MovimientoController extends Controller
             ->with('i', (request()->input('page', 1) - 1) * $movimientos->perPage());
     }
 
+    public function CrearMovimientosDetalle(Request $request)
+        {
+            // Valida los datos de entrada si es necesario
+            $request->validate([
+                'users' => 'required|integer', // Ajusta las reglas de validación según sea necesario
+                'caja' => 'required|integer',
+                'TipoMovimiento' => 'required|integer',
+            ]);
+
+            // Accede a los datos enviados en el cuerpo de la solicitud
+            $users = $request->input('users');
+            $caja = $request->input('caja');
+            $TipoMovimiento = $request->input('TipoMovimiento');
+
+            // Crea el movimiento
+            $movimiento = Movimiento::create([
+                'TipoMovimiento_id' => $TipoMovimiento,
+                'users_id' => $users,
+                'Caja_id' => $caja,
+                'estado' => 'Pendiente',
+            ]);
+
+            // Guarda el movimiento y devuelve una respuesta JSON
+            return response()->json($movimiento);
+        }
     /**
      * Show the form for creating a new resource.
      *
@@ -31,15 +56,9 @@ class MovimientoController extends Controller
      */
     public function crearPendientes( $users ,$caja ,$TipoMovimiento)
     {
-        $movimiento = Movimiento::create( [
-            'TipoMovimiento_id'=>$TipoMovimiento,
-            'users_id'=>$users ,
-            'Caja_id'=>$caja,
-            'estado'=>'Pendiente',
-        ]);
-        $movimiento->save();
+        
 
-        return view('movimientos.create', compact('movimiento'));
+        return view('movimientos.create', compact('TipoMovimiento','users','caja'));
 
     }
 

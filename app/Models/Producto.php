@@ -65,6 +65,8 @@ class Producto extends Model
     {
         return $this->hasMany('App\Models\Actualizarprecio', 'Producto_id', 'id');
     }
+
+    
     
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
@@ -105,6 +107,8 @@ class Producto extends Model
     {
         return $this->hasOne('App\Models\Familia1', 'id', 'familia1_id');
     }
+
+    
     
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
@@ -130,6 +134,10 @@ class Producto extends Model
         return $this->hasMany('App\Models\Preciosproducto', 'idProducto', 'id');
     }
     
+    public function movimientos()
+    {
+        return $this->hasMany('App\Models\Movimetosdatallado', 'Impuesto_id', 'id');
+    }
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */

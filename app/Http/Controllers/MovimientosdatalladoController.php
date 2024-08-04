@@ -47,8 +47,7 @@ class MovimientosdatalladoController extends Controller
 
         $movimientosdatallado = Movimientosdatallado::create($request->all());
 
-        return redirect()->route('movimientosdatallados.index')
-            ->with('success', 'Movimientosdatallado created successfully.');
+        return response()->json($movimientosdatallado);
     }
 
     /**
