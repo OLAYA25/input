@@ -33,6 +33,11 @@ class MovimientoController extends Controller
             // Guarda el movimiento y devuelve una respuesta JSON
             return response()->json($movimiento);
         }
+        public function pendientes(){
+            $movimiento = Movimiento::where('estado','Pendiente')->get();
+            // Guarda el movimiento y devuelve una respuesta JSON
+            return response()->json($movimiento);
+        }
     /**
      * Show the form for creating a new resource.
      *
@@ -80,7 +85,11 @@ class MovimientoController extends Controller
 
         return view('movimiento.show', compact('movimiento'));
     }
-
+    public function obtener($id)
+    {
+        $movimiento = Movimiento::with(['movimientosdatallados.productos'])->findOrFail($id);
+        return response()->json($movimiento);
+    }
     /**
      * Show the form for editing the specified resource.
      *
@@ -107,8 +116,7 @@ class MovimientoController extends Controller
 
         $movimiento->update($request->all());
 
-        return redirect()->route('movimientos.index')
-            ->with('success', 'Movimiento updated successfully');
+        return response()->json($movimiento);
     }
 
     /**

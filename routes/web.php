@@ -29,8 +29,12 @@ Route::get('/proveedores/BuscarProveedor', [App\Http\Controllers\ProveedoreContr
 Route::get('/buscar-cliente', [App\Http\Controllers\UsuariobasicoController::class, 'buscar'])->name('cliente.buscar');
 Route::get('/buscar-producto', [App\Http\Controllers\ProductoController::class, 'buscar'])->name('producto.buscar');
 Route::get('/buscar-cuenta', [App\Http\Controllers\CuentaController::class, 'buscar'])->name('cuenta.buscar');
+Route::get('/buscar-movimientos-pendiente', [App\Http\Controllers\MovimientoController::class, 'pendientes'])->name('movimientos.pendientes');
+
 
 Route::post('MovimientosDetallados/crearPendientes', [App\Http\Controllers\MovimientoController::class, 'CrearMovimientosDetalle'])->name('movimientos.CrearMovimientosDetalle');
+// En routes/web.php o routes/api.php
+Route::get('/movimientos/{id}', [App\Http\Controllers\MovimientoController::class, 'obtener'])->name('movimientos.obtener');
 
 Route::post('movimientos/crearPendientes/{users}/{caja}/{TipoMovimiento}', [App\Http\Controllers\MovimientoController::class, 'crearPendientes'])->name('movimientos.crearPendientes');
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
@@ -44,6 +48,7 @@ Route::resource('usuariobasicos',App\Http\Controllers\UsuariobasicoController::c
 Route::resource('proveedores',App\Http\Controllers\ProveedoreController::class);
 Route::resource('empresas',App\Http\Controllers\EmpresaController::class);
 Route::resource('bodegas',App\Http\Controllers\BodegaController::class);
+Route::resource('movimientos',App\Http\Controllers\MovimientoController::class);
 Route::resource('movimientosbasicos',App\Http\Controllers\MovimientosbasicoController::class);
 Route::resource('proveedoreusuarios',App\Http\Controllers\ProveedoreusuarioController::class);
 Route::resource('productos',App\Http\Controllers\ProductoController::class);

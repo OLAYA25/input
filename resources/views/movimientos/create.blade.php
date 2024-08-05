@@ -109,8 +109,8 @@
                 <div class="col-md-6">
                     <div class="logo">
                         <i class="fas fa-store"></i> Sistema de Ventas
-                        <a class=" fas fa-cash-register" href="#" id="Caja">   </a>
-                        <a class=" fas fa-wallet" href="#" id="OCaja">   </a>
+                        <a class="fas fa-cash-register" href="#" id="Caja"> </a>
+                        <a class="fas fa-wallet" href="#" id="OCaja"> </a>
                         <input type="text" id='CajaInput' style='display:none'>
                         <input type="text" id='CajaOnput' style='display:none'>
                     </div>
@@ -206,6 +206,12 @@
                 <div class="col-6 text-end" id="grandTotal">$0.00</div>
             </div>
         </div>
+
+        <div class="mt-3">
+            <button id="buscarPendientesBtn" class="btn btn-primary">Buscar Pendientes</button>
+            <button id="finalizarMovimientoBtn" class="btn btn-success">Finalizar Movimiento</button>
+            <button id="abrirCobroBtn" class="btn btn-warning">Abrir Cobro</button>
+        </div>
     </div>
 
     <!-- Modal para buscar cliente o proveedor -->
@@ -224,311 +230,620 @@
         </div>
     </div>
 
+    <!-- Modal para movimientos pendientes -->
+    <div class="modal fade" id="pendientesModal" tabindex="-1" aria-labelledby="pendientesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pendientesModalLabel">Movimientos Pendientes</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Fecha</th>
+                                <th>Total</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pendientesTableBody">
+                            <!-- Se llenará dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script>
-$(document).ready(function() {
-    let Movimientos = null;
-    const searchModal = new bootstrap.Modal(document.getElementById('searchModal'));
-    let currentSearchType = '';
+    $(document).ready(function() {
+        let Movimientos = null;
+        const searchModal = new bootstrap.Modal(document.getElementById('searchModal'));
+        const pendientesModal = new bootstrap.Modal(document.getElementById('pendientesModal'));
+        let currentSearchType = '';
 
-    // Funciones de búsqueda y modal
-    function openSearchModal(type) {
-        currentSearchType = type;
-        let labelText, placeholderText;
-        switch(type) {
-            case 'cliente':
-                labelText = 'Cliente';
-                placeholderText = 'Ingrese nombre o ID de cliente';
-                break;
-            case 'proveedor':
-                labelText = 'Proveedor';
-                placeholderText = 'Ingrese nombre o ID de proveedor';
-                break;
-            case 'caja':
-                labelText = 'Caja';
-                placeholderText = 'Ingrese nombre o ID de caja';
-                break;
-            case 'ocaja':
-                labelText = 'OCaja';
-                placeholderText = 'Ingrese nombre o ID de OCaja';
-                break;
-            default:
-                labelText = 'Bodega';
-                placeholderText = 'Ingrese nombre o ID de bodega';
-                break;
+        // Funciones de búsqueda y modal
+        function openSearchModal(type) {
+            currentSearchType = type;
+            let labelText, placeholderText;
+            switch(type) {
+                case 'cliente':
+                    labelText = 'Cliente';
+                    placeholderText = 'Ingrese nombre o ID de cliente';
+                    break;
+                case 'proveedor':
+                    labelText = 'Proveedor';
+                    placeholderText = 'Ingrese nombre o ID de proveedor';
+                    break;
+                case 'caja':
+                    labelText = 'Caja';
+                    placeholderText = 'Ingrese nombre o ID de caja';
+                    break;
+                case 'ocaja':
+                    labelText = 'OCaja';
+                    placeholderText = 'Ingrese nombre o ID de OCaja';
+                    break;
+                default:
+                    labelText = 'Bodega';
+                    placeholderText = 'Ingrese nombre o ID de bodega';
+                    break;
+            }
+            $('#searchModalLabel').text('Buscar ' + labelText);
+            $('#searchModalInput').val('').attr('placeholder', placeholderText);
+            $('#searchResults').empty(); // Limpiar resultados anteriores
+            searchModal.show();
         }
-        $('#searchModalLabel').text('Buscar ' + labelText);
-        $('#searchModalInput').val('').attr('placeholder', placeholderText);
-        $('#searchResults').empty(); // Limpiar resultados anteriores
-        searchModal.show();
-    }
 
-    $('#OrigenBodega_id, #DestinoBodega_id').on('change', function() {
-        var origenValue = $('#OrigenBodega_id').val();
-        var destinoValue = $('#DestinoBodega_id').val();
-        $('#BodegaOrigen').val(origenValue);
-        $('#BodegaDestino').val(destinoValue);
-    });
-
-    $('#buscarCliente, #buscarProveedor, #Caja, #OCaja').on('click focus', function() {
-        const type = this.id.replace('buscar', '').toLowerCase().replace('_id', '');
-        openSearchModal(type);
-    });
-
-    $('#searchModalInput').on('input', function() {
-        const termino = $(this).val();
-        buscar(termino);
-    });
-
-    function buscar(termino) {
-        let url;
-        switch(currentSearchType) {
-            case 'cliente':
-                url = '{{ route("cliente.buscar") }}';
-                break;
-            case 'proveedor':
-                url = '{{ route("proveedor.BuscarProveedor") }}';
-                break;
-            case 'caja':
-                url = '{{ route("cuenta.buscar") }}';
-                break;
-            case 'ocaja':
-                url = '{{ route("cuenta.buscar") }}';
-                break;
-        }
-        
-        $.ajax({
-            url: url,
-            method: 'GET',
-            data: { term: termino },
-            success: mostrarResultados,
-            error: error => console.error('Error en la búsqueda:', error)
+        $('#OrigenBodega_id, #DestinoBodega_id').on('change', function() {
+            var origenValue = $('#OrigenBodega_id').val();
+            var destinoValue = $('#DestinoBodega_id').val();
+            $('#BodegaOrigen').val(origenValue);
+            $('#BodegaDestino').val(destinoValue);
         });
-    }
 
-    function mostrarResultados(resultados) {
-        const html = resultados.map(item => 
-            `<div class="search-item" data-id="${item.id}" data-nombre="${item.RazonSocial || item.Nombre || item.Descripcion}">
-                ${item.RazonSocial || item.Nombre || item.Descripcion} - ${item.NumeroDocumento || item.Codigo}
-            </div>`
-        ).join('');
-        $('#searchResults').html(html);
-    }
+        $('#buscarCliente, #buscarProveedor, #Caja, #OCaja').on('click focus', function() {
+            const type = this.id.replace('buscar', '').toLowerCase().replace('_id', '');
+            openSearchModal(type);
+        });
 
-    $(document).on('click', '.search-item', function() {
-        const id = $(this).data('id');
-        const nombre = $(this).data('nombre');
-        let inputId, hiddenInputId;
+        $('#searchModalInput').on('input', function() {
+            const termino = $(this).val();
+            buscar(termino);
+        });
 
-        switch(currentSearchType) {
-            case 'cliente':
-                inputId = '#buscarCliente';
-                hiddenInputId = '#Users';
-                break;
-            case 'proveedor':
-                inputId = '#buscarProveedor';
-                hiddenInputId = '#Proveedor';
-                break;
-            case 'caja':
-                inputId = '#Caja';
-                hiddenInputId = '#CajaInput';
-                break;
-            case 'ocaja':
-                inputId = '#OCaja';
-                hiddenInputId = '#CajaOnput';
-                break;
-            default:
-                inputId = '#buscarBodega';
-                hiddenInputId = '#Bodega';
-                break;
-        }
-
-        $(inputId).val(nombre);
-        $(hiddenInputId).val(id);
-        searchModal.hide();
-    });
-
-    // Actualización de fecha
-    function updateDate() {
-        const date = new Date();
-        const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
-        document.getElementById('currentDate').textContent = date.toLocaleDateString('es-ES', options).replace(',', ' -');
-    }
-
-    updateDate();
-    setInterval(updateDate, 60000);  // Actualizar cada minuto
-
-    // Autocomplete de productos
-    $("#buscarProducto").autocomplete({
-        source: function(request, response) {
+        function buscar(termino) {
+            let url;
+            switch(currentSearchType) {
+                case 'cliente':
+                    url = '{{ route("cliente.buscar") }}';
+                    break;
+                case 'proveedor':
+                    url = '{{ route("proveedor.BuscarProveedor") }}';
+                    break;
+                case 'caja':
+                case 'ocaja':
+                    url = '{{ route("cuenta.buscar") }}';
+                    break;
+            }
+            
             $.ajax({
-                url: '{{ route("producto.buscar") }}',
-                data: { term: request.term },
-                success: function(data) {
-                    response(data.map(function(item) {
-                        return {
-                            label: `${item.Descripcion} - ${item.producto.id} - ${item.producto.Descripcion}`,
-                            value: item.producto.Descripcion,
-                            id: item.producto.id,
-                            codigo: item.Codigo,
-                            precio: item.producto.actualizarprecios[0].ValorPublico
-                        };
-                    }));
-                },
+                url: url,
+                method: 'GET',
+                data: { term: termino },
+                success: mostrarResultados,
                 error: error => console.error('Error en la búsqueda:', error)
             });
-        },
-        select: function(event, ui) {
-            agregarProducto(ui.item).catch(error => console.error('Error al agregar producto:', error));
-            $(this).val(''); // Limpiar el campo después de seleccionar
-            return false;
         }
-    });
 
-    $('#buscarProducto').on('keypress', function(event) {
-        if (event.keyCode === 13) {
-            const autocompleteInstance = $(this).autocomplete('instance');
-            const firstItem = autocompleteInstance.menu.element.find('li:first').data('ui-autocomplete-item');
-            if (firstItem) {
-                agregarProducto(firstItem).catch(error => console.error('Error al agregar producto:', error));
-                $(this).val('');
-                event.preventDefault();
+        function mostrarResultados(resultados) {
+            const html = resultados.map(item => 
+                `<div class="search-item" data-id="${item.id}" data-nombre="${item.RazonSocial || item.Nombre || item.Descripcion}">
+                    ${item.RazonSocial || item.Nombre || item.Descripcion} - ${item.NumeroDocumento || item.Codigo}
+                </div>`
+            ).join('');
+            $('#searchResults').html(html);
+        }
+
+        $(document).on('click', '.search-item', function() {
+            const id = $(this).data('id');
+            const nombre = $(this).data('nombre');
+            let inputId, hiddenInputId;
+
+            switch(currentSearchType) {
+                case 'cliente':
+                    inputId = '#buscarCliente';
+                    hiddenInputId = '#Users';
+                    break;
+                case 'proveedor':
+                    inputId = '#buscarProveedor';
+                    hiddenInputId = '#Proveedor';
+                    break;
+                case 'caja':
+                    inputId = '#Caja';
+                    hiddenInputId = '#CajaInput';
+                    break;
+                case 'ocaja':
+                    inputId = '#OCaja';
+                    hiddenInputId = '#CajaOnput';
+                    break;
+                default:
+                    inputId = '#buscarBodega';
+                    hiddenInputId = '#Bodega';
+                    break;
             }
+
+            $(inputId).val(nombre);
+            $(hiddenInputId).val(id);
+            searchModal.hide();
+        });
+
+        // Actualización de fecha
+        function updateDate() {
+            const date = new Date();
+            const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
+            document.getElementById('currentDate').textContent = date.toLocaleDateString('es-ES', options).replace(',', ' -');
         }
-    });
 
-    // Funciones de manejo de movimientos y productos
-    function CrearDetalle() {
-        return new Promise((resolve, reject) => {
-            const origenBodega = $('#BodegaOrigen').val();
-            const proveedor = $('#Proveedor').val();
-            const usuarioDestino = $('#Users').val();
-            const destinoBodega = $('#BodegaDestino').val();
-            const CuentaEn = $('#CajaInput').val();
-            const CuentaSL = $('#CajaOnput').val();
-            console.log('OrigenBodega_id:', origenBodega);
-            console.log('OrigenProveedor_id:', proveedor);
-            console.log('UsuarioDestino_id:', usuarioDestino);
-            console.log('DestinoBodega_id:', destinoBodega);
-            console.log('DestinoBodega_id:', CuentaSL);
-            console.log('DestinoBodega_id:', CuentaEn);
-            const data = {
-                users_id: '{{$users}}',
-                Caja_id: '{{$caja->id}}',
-                TipoMovimiento_id: '{{$TipoMovimiento}}',
-                OrigenBodega_id: origenBodega,
-                Cuenta_Salida :CuentaSL,
-                Cuenta_Entrada :CuentaEn,
-                OrigenProveedor_id: proveedor,
-                UsuarioDestino_id: usuarioDestino,
-                DestinoBodega_id: destinoBodega,
-                estado: 'Pendiente'
-            };
+        updateDate();
+        setInterval(updateDate, 60000);  // Actualizar cada minuto
 
-            fetch('{{Route("movimientos.CrearMovimientosDetalle")}}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Error en la solicitud');
-                return response.json();
-            })
-            .then(resolve)
-            .catch(reject);
+        // Autocomplete de productos
+        $("#buscarProducto").autocomplete({
+            source: function(request, response) {
+                $.ajax({
+                    url: '{{ route("producto.buscar") }}',
+                    data: { term: request.term },
+                    success: function(data) {
+                        response(data.map(function(item) {
+                            return {
+                                label: `${item.Descripcion} - ${item.producto.id} - ${item.producto.Descripcion}`,
+                                value: item.producto.Descripcion,
+                                id: item.producto.id,
+                                codigo: item.Codigo,
+                                precio: item.producto.actualizarprecios[0].ValorPublico
+                            };
+                        }));
+                    },
+                    error: error => console.error('Error en la búsqueda:', error)
+                });
+            },
+            select: function(event, ui) {
+                agregarProducto(ui.item).catch(error => console.error('Error al agregar producto:', error));
+                $(this).val(''); // Limpiar el campo después de seleccionar
+                return false;
+            }
         });
-    }
 
-    function CrearMovimiento(Movimientos_id, Producto_id, Cantidad_Egreso, Valor_Unitario, TotalValor, Impuesto_id, users_id, Cantidad_Ingresos, ValorUnitario) {
-        return new Promise((resolve, reject) => {
-            const data = {
-                Movimientos_id, Producto_id, Cantidad_Egreso, Valor_Unitario, 
-                TotalValor, Impuesto_id, users_id, Cantidad_Ingresos, ValorUnitario
-            };
-
-            fetch('{{Route("movimientosdatallados.store")}}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Error en la solicitud');
-                return response.json();
-            })
-            .then(resolve)
-            .catch(reject);
+        $('#buscarProducto').on('keypress', function(event) {
+            if (event.keyCode === 13) {
+                const autocompleteInstance = $(this).autocomplete('instance');
+                const firstItem = autocompleteInstance.menu.element.find('li:first').data('ui-autocomplete-item');
+                if (firstItem) {
+                    agregarProducto(firstItem).catch(error => console.error('Error al agregar producto:', error));
+                    $(this).val('');
+                    event.preventDefault();
+                }
+            }
         });
-    }
 
-    async function agregarProducto(producto) {
-        if (Movimientos == null) {
+        // Funciones de manejo de movimientos y productos
+        function CrearDetalle() {
+            return new Promise((resolve, reject) => {
+                const origenBodega = $('#BodegaOrigen').val();
+                const proveedor = $('#Proveedor').val();
+                const usuarioDestino = $('#Users').val();
+                const destinoBodega = $('#BodegaDestino').val();
+                const CuentaEn = $('#CajaInput').val();
+                const CuentaSL = $('#CajaOnput').val();
+                const data = {
+                    users_id: '{{$users}}',
+                    Caja_id: '{{$caja->id}}',
+                    TipoMovimiento_id: '{{$TipoMovimiento}}',
+                    OrigenBodega_id: origenBodega,
+                    Cuenta_Salida: CuentaSL,
+                    Cuenta_Entrada: CuentaEn,
+                    OrigenProveedor_id: proveedor,
+                    UsuarioDestino_id: usuarioDestino,
+                    DestinoBodega_id: destinoBodega,
+                    estado: 'Pendiente'
+                };
+
+                fetch('{{Route("movimientos.CrearMovimientosDetalle")}}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Error en la solicitud');
+                    return response.json();
+                })
+                .then(resolve)
+                .catch(reject);
+            });
+        }
+
+        function CrearMovimiento(Movimientos_id, Producto_id, Cantidad_Egreso, Valor_Unitario, TotalValor, Impuesto_id, users_id, Cantidad_Ingresos, ValorUnitario) {
+            return new Promise((resolve, reject) => {
+                const data = {
+                    Movimientos_id, Producto_id, Cantidad_Egreso, Valor_Unitario, 
+                    TotalValor, Impuesto_id, users_id, Cantidad_Ingresos, ValorUnitario
+                };
+
+                fetch('{{Route("movimientosdatallados.store")}}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Error en la solicitud');
+                    return response.json();
+                })
+                .then(resolve)
+                .catch(reject);
+            });
+        }
+
+        async function agregarProducto(producto) {
+            if (Movimientos == null) {
+                try {
+                    Movimientos = await CrearDetalle();
+                } catch (error) {
+                    console.error('Error al crear detalle:', error);
+                    return;
+                }
+            }
+
             try {
-                Movimientos = await CrearDetalle();
+                await CrearMovimiento(Movimientos.id, producto.id, 1, producto.precio, producto.precio, '', {{$users}}, 0, 0);
             } catch (error) {
-                console.error('Error al crear detalle:', error);
+                console.error('Error al crear movimiento:', error);
                 return;
             }
+
+            const row = `
+                <tr>
+                    <td>${producto.id}</td>
+                    <td>${producto.value}</td>
+                    <td><input type="number" class="form-control cantidad" value="1" min="1"></td>
+                    <td>${producto.precio}</td>
+                    <td class="total">${producto.precio}</td>
+                    <td><button class="btn btn-danger btn-sm eliminar"><i class="fas fa-trash"></i></button></td>
+                </tr>`;
+            $("#ventasTable tbody").append(row);
+            actualizarTotales();
         }
 
-        try {
-            await CrearMovimiento(Movimientos.id, producto.id, 1, producto.precio, producto.precio, '', {{$users}}, 0, 0);
-        } catch (error) {
-            console.error('Error al crear movimiento:', error);
-            return;
-        }
-
-        const row = `
-            <tr>
-                <td>${producto.id}</td>
-                <td>${producto.value}</td>
-                <td><input type="number" class="form-control cantidad" value="1" min="1"></td>
-                <td>${producto.precio}</td>
-                <td class="total">${producto.precio}</td>
-                <td><button class="btn btn-danger btn-sm eliminar"><i class="fas fa-trash"></i></button></td>
-            </tr>`;
-        $("#ventasTable tbody").append(row);
-        actualizarTotales();
-    }
-
-    // Eventos de tabla de productos
-    $(document).on('input', '.cantidad', function() {
-        const row = $(this).closest('tr');
-        const cantidad = $(this).val();
-        const precio = parseFloat(row.find('td:eq(3)').text());
-        const total = cantidad * precio;
-        row.find('.total').text(total.toFixed(2));
-        actualizarTotales();
-    });
-
-    $(document).on('click', '.eliminar', function() {
-        $(this).closest('tr').remove();
-        actualizarTotales();
-    });
-
-    function actualizarTotales() {
-        let totalUnidades = 0, totalFilas = 0, totalGeneral = 0;
-        $('#ventasTable tbody tr').each(function() {
-            totalFilas++;
-            const cantidad = parseInt($(this).find('.cantidad').val());
-            const total = parseFloat($(this).find('.total').text());
-            totalUnidades += cantidad;
-            totalGeneral += total;
+        // Eventos de tabla de productos
+        $(document).on('input', '.cantidad', function() {
+            const row = $(this).closest('tr');
+            const cantidad = $(this).val();
+            const precio = parseFloat(row.find('td:eq(3)').text());
+            const total = cantidad * precio;
+            row.find('.total').text(total.toFixed(2));
+            actualizarTotales();
         });
-        $('#rowCount').text(totalFilas);
-        $('#unitCount').text(totalUnidades);
-        $('#grandTotal').text('$' + totalGeneral.toFixed(2));
+
+        $(document).on('click', '.eliminar', function() {
+            $(this).closest('tr').remove();
+            actualizarTotales();
+        });
+
+        function actualizarTotales() {
+            let totalUnidades = 0, totalFilas = 0, totalGeneral = 0;
+            $('#ventasTable tbody tr').each(function() {
+                totalFilas++;
+                const cantidad = parseInt($(this).find('.cantidad').val());
+                const total = parseFloat($(this).find('.total').text());
+                totalUnidades += cantidad;
+                totalGeneral += total;
+            });
+            $('#rowCount').text(totalFilas);
+            $('#unitCount').text(totalUnidades);
+            $('#grandTotal').text('$' + totalGeneral.toFixed(2));
+        }
+
+        // Buscar movimientos pendientes
+        $('#buscarPendientesBtn').on('click', buscarMovimientosPendientes);
+
+        function buscarMovimientosPendientes() {
+            $.ajax({
+                url: '{{ route("movimientos.pendientes") }}',
+                method: 'GET',
+                success: function(data) {
+                    mostrarMovimientosPendientes(data);
+                    console.log(data);
+                    
+                },
+                error: function(error) {
+                    console.error('Error al buscar movimientos pendientes:', error);
+                }
+            });
+        }
+
+        function mostrarMovimientosPendientes(movimientos) {
+    let html = '';
+    
+    // Verificar si movimientos es un array
+    if (Array.isArray(movimientos)) {
+        movimientos.forEach(movimiento => {
+            html += crearFilaMovimiento(movimiento);
+        });
+    } 
+    // Si es un objeto, podría ser un solo movimiento o una respuesta con estructura diferente
+    else if (typeof movimientos === 'object' && movimientos !== null) {
+        // Si tiene una propiedad 'data', asumimos que es la estructura de respuesta de Laravel
+        if (Array.isArray(movimientos.data)) {
+            movimientos.data.forEach(movimiento => {
+                html += crearFilaMovimiento(movimiento);
+            });
+        } else {
+            // Si no es un array, tratarlo como un solo movimiento
+            html += crearFilaMovimiento(movimientos);
+        }
+    } else {
+        console.error('Formato de movimientos no reconocido:', movimientos);
+        html = '<tr><td colspan="4">No se pudieron cargar los movimientos</td></tr>';
     }
+
+    $('#pendientesTableBody').html(html);
+    pendientesModal.show();
+}
+
+function crearFilaMovimiento(movimiento) {
+    console.log(movimiento);
+    
+    return `
+        <tr>
+            <td>${movimiento.id}</td>
+            <td>${movimiento.created_at || 'N/A'}</td>
+            <td>$${(movimiento.total || 0).toFixed(2)}</td>
+            <td>
+                <button class="btn btn-primary btn-sm editarMovimiento" data-id="${movimiento.id}">Editar</button>
+            </td>
+        </tr>
+    `;
+}
+
+
+// Evento para editar movimiento
+$(document).on('click', '.editarMovimiento', function() {
+    const movimientoId = $(this).data('id');
+    cargarMovimientoPendiente(movimientoId);
 });
 
-  
+
+function cargarMovimientoPendiente(movimientoId) {
+    $.ajax({
+        url: `{{ route('movimientos.obtener', '') }}/${movimientoId}`,
+        method: 'GET',
+        success: function(response) {
+            console.log('Movimiento cargado:', response);
+            if (response && response.id) {
+                Movimientos = response;
+                llenarFormularioConMovimiento(response);
+                pendientesModal.hide();
+            } else {
+                alert('No se pudo cargar el movimiento');
+            }
+        },
+        error: function(error) {
+            console.error('Error al cargar el movimiento:', error);
+            alert('Error al cargar el movimiento');
+        }
+    });
+}
+
+function llenarFormularioConMovimiento(movimiento) {
+    // Llena los campos del formulario con los datos del movimiento
+    $('#BodegaOrigen').val(movimiento.OrigenBodega_id);
+    $('#BodegaDestino').val(movimiento.DestinoBodega_id);
+    $('#OrigenBodega_id').val(movimiento.OrigenBodega_id).trigger('change');
+    $('#DestinoBodega_id').val(movimiento.DestinoBodega_id).trigger('change');
+    $('#Proveedor').val(movimiento.OrigenProveedor_id);
+    $('#Users').val(movimiento.UsuarioDestino_id);
+    $('#CajaInput').val(movimiento.Cuenta_Entrada);
+    $('#CajaOnput').val(movimiento.Cuenta_Salida);
+
+    // Limpiar la tabla de productos actual
+    $('#ventasTable tbody').empty();
+
+    // Cargar los productos del movimiento
+    if (movimiento.movimientosdatallados && Array.isArray(movimiento.movimientosdatallados)) {
+        movimiento.movimientosdatallados.forEach(detalle => {
+            agregarProductoATabla(detalle);
+        });
+    }
+
+    actualizarTotales();
+}
+
+function agregarProductoATabla(detalle) {
+    const row = `
+        <tr>
+            <td>${detalle.Producto_id}</td>
+            <td>${detalle.producto ? detalle.producto.Descripcion : 'N/A'}</td>
+            <td><input type="number" class="form-control cantidad" value="${detalle.Cantidad_Egreso}" min="1"></td>
+            <td>${detalle.Valor_Unitario}</td>
+            <td class="total">${detalle.TotalValor}</td>
+            <td><button class="btn btn-danger btn-sm eliminar"><i class="fas fa-trash"></i></button></td>
+        </tr>`;
+    $("#ventasTable tbody").append(row);
+}
+
+// Asegúrate de que esta función esté actualizada para manejar la edición
+async function agregarProducto(producto) {
+    if (Movimientos == null) {
+        try {
+            Movimientos = await CrearDetalle();
+        } catch (error) {
+            console.error('Error al crear detalle:', error);
+            return;
+        }
+    }
+
+    try {
+        const nuevoMovimiento = await CrearMovimiento(Movimientos.id, producto.id, 1, producto.precio, producto.precio, '', {{$users}}, 0, 0);
+        agregarProductoATabla(nuevoMovimiento);
+    } catch (error) {
+        console.error('Error al crear movimiento:', error);
+        return;
+    }
+
+    actualizarTotales();
+}
+
+// Actualiza esta función si es necesario
+function actualizarTotales() {
+    let totalUnidades = 0, totalFilas = 0, totalGeneral = 0;
+    $('#ventasTable tbody tr').each(function() {
+        totalFilas++;
+        const cantidad = parseInt($(this).find('.cantidad').val());
+        const total = parseFloat($(this).find('.total').text());
+        totalUnidades += cantidad;
+        totalGeneral += total;
+    });
+    $('#rowCount').text(totalFilas);
+    $('#unitCount').text(totalUnidades);
+    $('#grandTotal').text('$' + totalGeneral.toFixed(2));
+}
+        // Finalizar movimiento
+        $('#finalizarMovimientoBtn').on('click', function() {
+            if (Movimientos) {
+                $.ajax({
+                    url: `{{ route("movimientos.update", "") }}/${Movimientos.id}`,
+                    method: 'PUT',
+                    data: {
+                        estado: 'Finalizado',
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        alert('Movimiento finalizado con éxito');
+                        // Limpiar la interfaz o redirigir según sea necesario
+                        limpiarInterfaz();
+                    },
+                    error: function(error) {
+                        console.error('Error al finalizar el movimiento:', error);
+                    }
+                });
+            } else {
+                alert('No hay un movimiento activo para finalizar');
+            }
+        });
+
+        // Abrir modal de cobro
+        $('#abrirCobroBtn').on('click', abrirModalCobro);
+
+        function abrirModalCobro() {
+            let totalGeneral = parseFloat($('#grandTotal').text().replace('$', ''));
+            let valorSinImpuesto = totalGeneral / 1.19; // Asumiendo un IVA del 19%
+            let valorImpuesto = totalGeneral - valorSinImpuesto;
+
+            let modalHtml = `
+                <div class="modal fade" id="cobroModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Cobro</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Total: $${totalGeneral.toFixed(2)}</p>
+                                <p>Valor sin Impuesto: $${valorSinImpuesto.toFixed(2)}</p>
+                                <p>Valor Impuesto: $${valorImpuesto.toFixed(2)}</p>
+                                <select id="metodoPago" class="form-select">
+                                    <option value="efectivo">Efectivo</option>
+                                    <option value="tarjeta">Tarjeta</option>
+                                    <!-- Agrega más métodos de pago según sea necesario -->
+                                </select>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                <button type="button" class="btn btn-primary" id="confirmarCobroBtn">Confirmar Cobro</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            $('body').append(modalHtml);
+            let cobroModal = new bootstrap.Modal(document.getElementById('cobroModal'));
+            cobroModal.show();
+
+            $('#confirmarCobroBtn').on('click', function() {
+                let metodoPago = $('#metodoPago').val();
+                finalizarCobro(totalGeneral, valorSinImpuesto, valorImpuesto, metodoPago);
+                cobroModal.hide();
+            });
+        }
+
+        function finalizarCobro(total, valorSinImpuesto, valorImpuesto, metodoPago) {
+            if (Movimientos) {
+                $.ajax({
+                    url: `{{ route("movimientos.update", "") }}/${Movimientos.id}`,
+                    method: 'PUT',
+                    data: {
+                        estado: 'Finalizado',
+                        total: total,
+                        valorSinImpuesto: valorSinImpuesto,
+                        valorImpuesto: valorImpuesto,
+                        metodoPago: metodoPago,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        alert('Cobro realizado con éxito');
+                        limpiarInterfaz();
+                    },
+                    error: function(error) {
+                        console.error('Error al finalizar el cobro:', error);
+                    }
+                });
+            } else {
+                alert('No hay un movimiento activo para cobrar');
+            }
+        }
+
+        function limpiarInterfaz() {
+            // Limpiar la tabla de productos
+            $('#ventasTable tbody').empty();
+            // Resetear totales
+            $('#rowCount').text('0');
+            $('#unitCount').text('0');
+            $('#pointCount').text('0');
+            $('#weightCount').text('0');
+            $('#grandTotal').text('$0.00');
+            // Limpiar campos de búsqueda
+            $('#buscarProveedor, #buscarCliente, #OrigenBodega_id, #DestinoBodega_id').val('');
+            // Resetear el objeto Movimientos
+            Movimientos = null;
+        }
+
+        // Evento para la tecla F4 en PC (buscar pendientes)
+        $(document).on('keydown', function(e) {
+            if (e.which === 115) { // F4
+                e.preventDefault();
+                buscarMovimientosPendientes();
+            }
+        });
+
+        // Evento para la tecla F2 en PC (abrir cobro)
+        $(document).on('keydown', function(e) {
+            if (e.which === 113) { // F2
+                e.preventDefault();
+                abrirModalCobro();
+            }
+        });
+    });
     </script>
 </body>
 </html>
