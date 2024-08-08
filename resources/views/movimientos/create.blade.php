@@ -17,33 +17,36 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <style>
-        :root {
-            --primary-color: #3498db;
-            --secondary-color: #2ecc71;
-            --background-color: #ecf0f1;
-            --text-color: #34495e;
+      :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --background-color: #f5f5f5;
+            --text-color: #333;
+            --border-color: #dcdcdc;
         }
 
         body {
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Arial', sans-serif;
             background-color: var(--background-color);
             color: var(--text-color);
+            line-height: 1.6;
         }
 
         .container-fluid {
             padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
         .header {
             background-color: white;
-            border-radius: 10px;
-            padding: 20px;
+            border: 1px solid var(--border-color);
+            padding: 15px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .logo {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
             color: var(--primary-color);
         }
@@ -51,54 +54,76 @@
         .date-box {
             background-color: var(--primary-color);
             color: white;
-            padding: 10px;
-            border-radius: 5px;
+            padding: 8px;
             text-align: center;
+            font-size: 14px;
         }
 
         .product-table {
             background-color: white;
-            border-radius: 10px;
-            padding: 20px;
+            border: 1px solid var(--border-color);
+            padding: 15px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
         }
 
         .product-table th {
-            background-color: var(--primary-color);
+            background-color: var(--secondary-color);
             color: white;
         }
 
         .footer {
             background-color: white;
-            border-radius: 10px;
-            padding: 20px;
+            border: 1px solid var(--border-color);
+            padding: 15px;
             margin-top: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .total-section {
             background-color: var(--secondary-color);
             color: white;
-            padding: 20px;
-            border-radius: 10px;
-            font-size: 24px;
+            padding: 15px;
+            font-size: 18px;
             font-weight: bold;
         }
 
         .form-control:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+            box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.25);
         }
 
-        .search-item {
-            cursor: pointer;
-            padding: 10px;
-            border-bottom: 1px solid #eee;
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
         }
 
-        .search-item:hover {
-            background-color: #f8f9fa;
+        .btn-success {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .btn-warning {
+            background-color: #f39c12;
+            border-color: #f39c12;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .container-fluid {
+                padding: 10px;
+            }
+
+            .header, .product-table, .footer {
+                padding: 10px;
+            }
+
+            .logo {
+                font-size: 18px;
+            }
+
+            .date-box {
+                font-size: 12px;
+            }
         }
     </style>
 </head>
@@ -166,21 +191,24 @@
             <div class="mb-3">
                 <input type="text" id="buscarProducto" class="form-control" placeholder="Buscar producto por código o nombre...">
             </div>
-            <table id="ventasTable" class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Código</th>
-                        <th>Descripción</th>
-                        <th>Cantidad</th>
-                        <th>Precio</th>
-                        <th>Total</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Las filas se llenarán dinámicamente con JavaScript -->
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table id="ventasTable" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Descripción</th>
+                            <th>Cantidad</th>
+                            <th>Precio</th>
+                            <th>Total</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Las filas se llenarán dinámicamente con JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
         </div>
 
         <div class="footer">
@@ -745,47 +773,86 @@ function actualizarTotales() {
         $('#abrirCobroBtn').on('click', abrirModalCobro);
 
         function abrirModalCobro() {
-            let totalGeneral = parseFloat($('#grandTotal').text().replace('$', ''));
-            let valorSinImpuesto = totalGeneral / 1.19; // Asumiendo un IVA del 19%
-            let valorImpuesto = totalGeneral - valorSinImpuesto;
+    let totalGeneral = parseFloat($('#grandTotal').text().replace('$', '').replace(',', '').trim());
+    
+    if (isNaN(totalGeneral)) {
+        console.error('El total no es un número válido:', $('#grandTotal').text());
+        totalGeneral = 0;
+    }
 
-            let modalHtml = `
-                <div class="modal fade" id="cobroModal" tabindex="-1">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Cobro</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body">
-                                <p>Total: $${totalGeneral.toFixed(2)}</p>
-                                <p>Valor sin Impuesto: $${valorSinImpuesto.toFixed(2)}</p>
-                                <p>Valor Impuesto: $${valorImpuesto.toFixed(2)}</p>
-                                <select id="metodoPago" class="form-select">
-                                    <option value="efectivo">Efectivo</option>
-                                    <option value="tarjeta">Tarjeta</option>
-                                    <!-- Agrega más métodos de pago según sea necesario -->
-                                </select>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                                <button type="button" class="btn btn-primary" id="confirmarCobroBtn">Confirmar Cobro</button>
-                            </div>
+    console.log('Total General:', totalGeneral); // Para depuración
+
+    let valorSinImpuesto = totalGeneral / 1.19; // Asumiendo un IVA del 19%
+    let valorImpuesto = totalGeneral - valorSinImpuesto;
+
+    let modalHtml = `
+        <div class="modal fade" id="cobroModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Cobro</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <h2 class="text-center mb-4">Total a cobrar: $<span id="totalACobrar">${totalGeneral.toFixed(2)}</span></h2>
+                        <div class="form-group mb-3">
+                            <label for="montoRecibido" class="form-label">Monto recibido:</label>
+                            <input type="number" class="form-control form-control-lg" id="montoRecibido" placeholder="Ingrese el monto recibido">
                         </div>
+                        <h3 class="mt-4">Cambio a devolver: $<span id="cambioADevolver">0.00</span></h3>
+                        <p>Valor sin Impuesto: $${valorSinImpuesto.toFixed(2)}</p>
+                        <p>Valor Impuesto: $${valorImpuesto.toFixed(2)}</p>
+                        <select id="metodoPago" class="form-select mt-3">
+                            <option value="efectivo">Efectivo</option>
+                            <option value="tarjeta">Tarjeta</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-primary" id="confirmarCobroBtn">Confirmar Cobro</button>
                     </div>
                 </div>
-            `;
+            </div>
+        </div>
+    `;
 
-            $('body').append(modalHtml);
-            let cobroModal = new bootstrap.Modal(document.getElementById('cobroModal'));
-            cobroModal.show();
+    $('#cobroModal').remove();
+    $('body').append(modalHtml);
 
-            $('#confirmarCobroBtn').on('click', function() {
-                let metodoPago = $('#metodoPago').val();
-                finalizarCobro(totalGeneral, valorSinImpuesto, valorImpuesto, metodoPago);
-                cobroModal.hide();
-            });
+    let cobroModal = new bootstrap.Modal(document.getElementById('cobroModal'));
+    cobroModal.show();
+
+    $('#cobroModal').on('shown.bs.modal', function () {
+        $('#montoRecibido').focus();
+    });
+
+    function realizarCobro() {
+        let metodoPago = $('#metodoPago').val();
+        let montoRecibido = parseFloat($('#montoRecibido').val()) || 0;
+        if (montoRecibido >= totalGeneral) {
+            finalizarCobro(totalGeneral, valorSinImpuesto, valorImpuesto, metodoPago, montoRecibido);
+            cobroModal.hide();
+        } else {
+            alert('El monto recibido debe ser igual o mayor al total a cobrar.');
         }
+    }
+
+    $('#montoRecibido').on('input', function() {
+        let montoRecibido = parseFloat($(this).val()) || 0;
+        let cambio = montoRecibido - totalGeneral;
+        $('#cambioADevolver').text(cambio.toFixed(2));
+    });
+
+    // Manejar el evento keypress para detectar Enter
+    $('#montoRecibido').on('keypress', function(e) {
+        if (e.which === 13) { // 13 es el código de tecla para Enter
+            e.preventDefault(); // Prevenir el comportamiento por defecto
+            realizarCobro();
+        }
+    });
+
+    $('#confirmarCobroBtn').on('click', realizarCobro);
+}
 
         function finalizarCobro(total, valorSinImpuesto, valorImpuesto, metodoPago) {
             if (Movimientos) {
