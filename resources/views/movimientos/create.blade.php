@@ -188,16 +188,26 @@
         </div>
 
         <div class="product-table">
-            <div class="mb-3">
-                <input type="text" id="buscarProducto" class="form-control" placeholder="Buscar producto por código o nombre...">
+            <div class="row">
+                <div class="col-sm-8 mb-1">
+                    <input type="text" id="buscarProducto" class="form-control" placeholder="Buscar producto por código o nombre...">
+                </div>
+                <div class=" col-sm-2 mb-1">
+                    <input type="text" id="CantidadEngreso" class="form-control" placeholder="Cantidad Engreso">
+                </div>
+                <div class="col-sm-2 mb-1">
+                    <input type="text" id="CantidadIngreso" class="form-control" placeholder="Cantidad Ingreso">
+                </div>
             </div>
+            
             <div class="table-responsive">
                 <table id="ventasTable" class="table table-striped">
                     <thead>
                         <tr>
                             <th>Código</th>
                             <th>Descripción</th>
-                            <th>Cantidad</th>
+                            <th>Cantidad E</th>
+                            <th>Cantidad I</th>
                             <th>Precio</th>
                             <th>Total</th>
                             <th>Acciones</th>
@@ -458,6 +468,28 @@
                 }
             }
         });
+        $('#CantidadIngreso').on('keypress', function(event) {
+            if (event.keyCode === 13) {
+                const autocompleteInstance = $(this).autocomplete('instance');
+                const firstItem = autocompleteInstance.menu.element.find('li:first').data('ui-autocomplete-item');
+                if (firstItem) {
+                    agregarProducto(firstItem).catch(error => console.error('Error al agregar producto:', error));
+                    $(this).val('');
+                    event.preventDefault();
+                }
+            }
+        });
+        $('#CantidadEngreso').on('keypress', function(event) {
+            if (event.keyCode === 13) {
+                const autocompleteInstance = $(this).autocomplete('instance');
+                const firstItem = autocompleteInstance.menu.element.find('li:first').data('ui-autocomplete-item');
+                if (firstItem) {
+                    agregarProducto(firstItem).catch(error => console.error('Error al agregar producto:', error));
+                    $(this).val('');
+                    event.preventDefault();
+                }
+            }
+        });
 
         // Funciones de manejo de movimientos y productos
         function CrearDetalle() {
@@ -498,11 +530,17 @@
             });
         }
 
-        function CrearMovimiento(Movimientos_id, Producto_id, Cantidad_Egreso, Valor_Unitario, TotalValor, Impuesto_id, users_id, Cantidad_Ingresos, ValorUnitario) {
+        function CrearMovimiento(Movimientos_ids, Producto_ids,Cantidad_Ingresos, Valor_Unitarios, TotalValors, Impuesto_ids,  Cantidad_Egresos,users_ids) {
             return new Promise((resolve, reject) => {
                 const data = {
-                    Movimientos_id, Producto_id, Cantidad_Egreso, Valor_Unitario, 
-                    TotalValor, Impuesto_id, users_id, Cantidad_Ingresos, ValorUnitario
+                    Movimientos_id:Movimientos_ids, 
+                    Producto_id:Producto_ids,
+                    Cantidad_Ingreso:Cantidad_Ingresos, 
+                    Valor_Unitario:Valor_Unitarios, 
+                    TotalValor:TotalValors, 
+                    Impuesto_id:Impuesto_ids, 
+                    Cantidad_Egreso:Cantidad_Egresos, 
+                    users_id:users_ids, 
                 };
 
                 fetch('{{Route("movimientosdatallados.store")}}', {
@@ -533,7 +571,15 @@
             }
 
             try {
-                await CrearMovimiento(Movimientos.id, producto.id, 1, producto.precio, producto.precio, '', {{$users}}, 0, 0);
+               var cantidI= $("#CantidadIngreso").val();
+               if (cantidI == null|| cantidI =="") {
+                cantidI=1;
+               }
+               var cantidE = $("#CantidadEngreso").val();
+               if (cantidE == null|| cantidE =="") {
+                cantidE=1;
+               }
+                await CrearMovimiento(Movimientos.id, producto.id, cantidI, producto.precio, producto.precio, '', cantidE ,{{$users}});
             } catch (error) {
                 console.error('Error al crear movimiento:', error);
                 return;
@@ -543,7 +589,8 @@
                 <tr>
                     <td>${producto.id}</td>
                     <td>${producto.value}</td>
-                    <td><input type="number" class="form-control cantidad" value="1" min="1"></td>
+                    <td><input type="number" class="form-control cantidad" onkeypress="CantdadE(event,${producto.id})" value="1" min="1"></td>
+                    <td><input type="number" class="form-control cantidadI"  onkeypress="CantdadI(event,${producto.id})"  value="1" min="1"></td>
                     <td>${producto.precio}</td>
                     <td class="total">${producto.precio}</td>
                     <td><button class="btn btn-danger btn-sm eliminar"><i class="fas fa-trash"></i></button></td>
@@ -559,9 +606,36 @@
             const precio = parseFloat(row.find('td:eq(3)').text());
             const total = cantidad * precio;
             row.find('.total').text(total.toFixed(2));
+            actualizarCantidadEnBaseDeDatos(Movimientos.id, productoId, cantidad, precio, total);
             actualizarTotales();
-        });
 
+        });
+        async function actualizarCantidadEnBaseDeDatos(movimientosId, productoId, cantidad, precio, total) {
+            try {
+                const response = await fetch(`{{ route('movimientosdatallados.update', '') }}/${movimientosId}/${productoId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        Cantidad_Egreso: cantidad,
+                        Valor_Unitario: precio,
+                        TotalValor: total
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al actualizar la cantidad en la base de datos');
+                }
+
+                const data = await response.json();
+                console.log('Cantidad actualizada en la base de datos:', data);
+            } catch (error) {
+                console.error('Error al actualizar la cantidad en la base de datos:', error);
+            }
+        }
+        
         $(document).on('click', '.eliminar', function() {
             $(this).closest('tr').remove();
             actualizarTotales();
@@ -697,11 +771,14 @@ function llenarFormularioConMovimiento(movimiento) {
 }
 
 function agregarProductoATabla(detalle) {
+    console.log(detalle);
+    
     const row = `
         <tr>
             <td>${detalle.Producto_id}</td>
             <td>${detalle.producto ? detalle.producto.Descripcion : 'N/A'}</td>
-            <td><input type="number" class="form-control cantidad" value="${detalle.Cantidad_Egreso}" min="1"></td>
+            <td><input type="number" class="form-control cantidad" onkeypless="updateCuentaE(event,${detalle.id})" value="${detalle.Cantidad_Egreso}" min="1"></td>
+            <td><input type="number" class="form-control cantidad" onkeypless="updateCuentaI(event,${detalle.id})" value="${detalle.Cantidad_Ingreso}" min="1"></td>
             <td>${detalle.Valor_Unitario}</td>
             <td class="total">${detalle.TotalValor}</td>
             <td><button class="btn btn-danger btn-sm eliminar"><i class="fas fa-trash"></i></button></td>
@@ -721,7 +798,18 @@ async function agregarProducto(producto) {
     }
 
     try {
-        const nuevoMovimiento = await CrearMovimiento(Movimientos.id, producto.id, 1, producto.precio, producto.precio, '', {{$users}}, 0, 0);
+        var cantidI= $("#CantidadIngreso").val();
+        var cantidE = $("#CantidadEngreso").val();
+        var cantidI= $("#CantidadIngreso").val();
+               if (cantidI == null|| cantidI =="") {
+                cantidI=1;
+               }
+               var cantidE = $("#CantidadEngreso").val();
+               if (cantidE == null|| cantidE =="") {
+                cantidE=1;
+               }
+
+        const nuevoMovimiento = await CrearMovimiento(Movimientos.id, producto.id, cantidI, producto.precio, producto.precio, '', cantidE,{{$users}});
         agregarProductoATabla(nuevoMovimiento);
     } catch (error) {
         console.error('Error al crear movimiento:', error);

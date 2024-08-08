@@ -89,8 +89,7 @@ class MovimientosdatalladoController extends Controller
 
         $movimientosdatallado->update($request->all());
 
-        return redirect()->route('movimientosdatallados.index')
-            ->with('success', 'Movimientosdatallado updated successfully');
+        return response()->json($movimientosdatallado);
     }
 
     /**
