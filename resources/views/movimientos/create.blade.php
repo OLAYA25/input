@@ -299,7 +299,65 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script>
+  
+
     $(document).ready(function() {
+        window.updateCuentaI = async function (event, id) {
+    var inputElement = event.target;
+    var cantidadIngreso = inputElement.value;
+    var row = $(inputElement).closest('tr');
+    var precioUnitario = parseFloat(row.find('td:eq(4)').text());
+
+    $.ajax({
+        url: `{{ route("movimientosdatallados.update", "") }}/${id}`,
+        method: 'PATCH',
+        data: {
+            Cantidad_Ingreso: cantidadIngreso,
+            _token: '{{ csrf_token() }}'
+        },
+        success: function(response) {
+            // Actualizar el total de la fila
+            var nuevoTotal = cantidadIngreso * precioUnitario;
+            row.find('.total').text(nuevoTotal.toFixed(2));
+            
+            // Recalcular y actualizar totales
+            actualizarTotales();
+        },
+        error: function(error) {
+            console.error('Error al actualizar el movimiento:', error);
+        }
+    });
+}
+
+window.updateCuentaE = async function(event, id) {
+    var inputElement = event.target;
+    var cantidadEgreso = inputElement.value;
+    var row = $(inputElement).closest('tr');
+    var precioUnitario = parseFloat(row.find('td:eq(4)').text());
+
+    $.ajax({
+        url: `{{ route("movimientosdatallados.update", "") }}/${id}`,
+        method: 'PATCH',
+        data: {
+            Cantidad_Egreso: cantidadEgreso,
+            _token: '{{ csrf_token() }}'
+        },
+        success: function(response) {
+            // Actualizar el total de la fila
+            var nuevoTotal = cantidadEgreso * precioUnitario;
+            row.find('.total').text(nuevoTotal.toFixed(2));
+            
+            // Recalcular y actualizar totales
+            actualizarTotales();
+        },
+        error: function(error) {
+            console.error('Error al actualizar el movimiento:', error);
+        }
+    });
+}
+
+
+
         let Movimientos = null;
         const searchModal = new bootstrap.Modal(document.getElementById('searchModal'));
         const pendientesModal = new bootstrap.Modal(document.getElementById('pendientesModal'));
@@ -589,8 +647,8 @@
                 <tr>
                     <td>${producto.id}</td>
                     <td>${producto.value}</td>
-                    <td><input type="number" class="form-control cantidad" onkeypress="CantdadE(event,${producto.id})" value="1" min="1"></td>
-                    <td><input type="number" class="form-control cantidadI"  onkeypress="CantdadI(event,${producto.id})"  value="1" min="1"></td>
+                    <td><input type="number" class="form-control cantidad" onchange="CantdadE(event,${producto.id})" value="1" min="1"></td>
+                    <td><input type="number" class="form-control cantidadI"  onchange="CantdadI(event,${producto.id})"  value="1" min="1"></td>
                     <td>${producto.precio}</td>
                     <td class="total">${producto.precio}</td>
                     <td><button class="btn btn-danger btn-sm eliminar"><i class="fas fa-trash"></i></button></td>
@@ -606,35 +664,11 @@
             const precio = parseFloat(row.find('td:eq(3)').text());
             const total = cantidad * precio;
             row.find('.total').text(total.toFixed(2));
-            actualizarCantidadEnBaseDeDatos(Movimientos.id, productoId, cantidad, precio, total);
+           
             actualizarTotales();
 
         });
-        async function actualizarCantidadEnBaseDeDatos(movimientosId, productoId, cantidad, precio, total) {
-            try {
-                const response = await fetch(`{{ route('movimientosdatallados.update', '') }}/${movimientosId}/${productoId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        Cantidad_Egreso: cantidad,
-                        Valor_Unitario: precio,
-                        TotalValor: total
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error('Error al actualizar la cantidad en la base de datos');
-                }
-
-                const data = await response.json();
-                console.log('Cantidad actualizada en la base de datos:', data);
-            } catch (error) {
-                console.error('Error al actualizar la cantidad en la base de datos:', error);
-            }
-        }
+     
         
         $(document).on('click', '.eliminar', function() {
             $(this).closest('tr').remove();
@@ -645,9 +679,10 @@
             let totalUnidades = 0, totalFilas = 0, totalGeneral = 0;
             $('#ventasTable tbody tr').each(function() {
                 totalFilas++;
-                const cantidad = parseInt($(this).find('.cantidad').val());
-                const total = parseFloat($(this).find('.total').text());
-                totalUnidades += cantidad;
+                const cantidadIngreso = parseInt($(this).find('input.cantidadI').val()) || 0;
+                const cantidadEgreso = parseInt($(this).find('input.cantidad').val()) || 0;
+                const total = parseFloat($(this).find('.total').text()) || 0;
+                totalUnidades += cantidadIngreso + cantidadEgreso;
                 totalGeneral += total;
             });
             $('#rowCount').text(totalFilas);
@@ -771,20 +806,21 @@ function llenarFormularioConMovimiento(movimiento) {
 }
 
 function agregarProductoATabla(detalle) {
-    console.log(detalle);
-    
     const row = `
         <tr>
             <td>${detalle.Producto_id}</td>
             <td>${detalle.producto ? detalle.producto.Descripcion : 'N/A'}</td>
-            <td><input type="number" class="form-control cantidad" onkeypless="updateCuentaE(event,${detalle.id})" value="${detalle.Cantidad_Egreso}" min="1"></td>
-            <td><input type="number" class="form-control cantidad" onkeypless="updateCuentaI(event,${detalle.id})" value="${detalle.Cantidad_Ingreso}" min="1"></td>
+            <td><input type="number" class="form-control cantidad" onchange="updateCuentaE(event, ${detalle.id})" value="${detalle.Cantidad_Egreso}" min="0"></td>
+            <td><input type="number" class="form-control cantidadI" onchange="updateCuentaI(event, ${detalle.id})" value="${detalle.Cantidad_Ingreso}" min="0"></td>
             <td>${detalle.Valor_Unitario}</td>
             <td class="total">${detalle.TotalValor}</td>
             <td><button class="btn btn-danger btn-sm eliminar"><i class="fas fa-trash"></i></button></td>
         </tr>`;
     $("#ventasTable tbody").append(row);
+    actualizarTotales();
 }
+
+
 
 // Asegúrate de que esta función esté actualizada para manejar la edición
 async function agregarProducto(producto) {
@@ -868,8 +904,6 @@ function actualizarTotales() {
         totalGeneral = 0;
     }
 
-    console.log('Total General:', totalGeneral); // Para depuración
-
     let valorSinImpuesto = totalGeneral / 1.19; // Asumiendo un IVA del 19%
     let valorImpuesto = totalGeneral - valorSinImpuesto;
 
@@ -914,7 +948,13 @@ function actualizarTotales() {
         $('#montoRecibido').focus();
     });
 
-    function realizarCobro() {
+    $('#montoRecibido').on('input', function() {
+        let montoRecibido = parseFloat($(this).val()) || 0;
+        let cambio = montoRecibido - totalGeneral;
+        $('#cambioADevolver').text(cambio.toFixed(2));
+    });
+
+    $('#confirmarCobroBtn').on('click', function() {
         let metodoPago = $('#metodoPago').val();
         let montoRecibido = parseFloat($('#montoRecibido').val()) || 0;
         if (montoRecibido >= totalGeneral) {
@@ -923,50 +963,35 @@ function actualizarTotales() {
         } else {
             alert('El monto recibido debe ser igual o mayor al total a cobrar.');
         }
-    }
-
-    $('#montoRecibido').on('input', function() {
-        let montoRecibido = parseFloat($(this).val()) || 0;
-        let cambio = montoRecibido - totalGeneral;
-        $('#cambioADevolver').text(cambio.toFixed(2));
     });
-
-    // Manejar el evento keypress para detectar Enter
-    $('#montoRecibido').on('keypress', function(e) {
-        if (e.which === 13) { // 13 es el código de tecla para Enter
-            e.preventDefault(); // Prevenir el comportamiento por defecto
-            realizarCobro();
-        }
-    });
-
-    $('#confirmarCobroBtn').on('click', realizarCobro);
 }
 
-        function finalizarCobro(total, valorSinImpuesto, valorImpuesto, metodoPago) {
-            if (Movimientos) {
-                $.ajax({
-                    url: `{{ route("movimientos.update", "") }}/${Movimientos.id}`,
-                    method: 'PUT',
-                    data: {
-                        estado: 'Finalizado',
-                        total: total,
-                        valorSinImpuesto: valorSinImpuesto,
-                        valorImpuesto: valorImpuesto,
-                        metodoPago: metodoPago,
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function(response) {
-                        alert('Cobro realizado con éxito');
-                        limpiarInterfaz();
-                    },
-                    error: function(error) {
-                        console.error('Error al finalizar el cobro:', error);
-                    }
-                });
-            } else {
-                alert('No hay un movimiento activo para cobrar');
+function finalizarCobro(total, valorSinImpuesto, valorImpuesto, metodoPago, montoRecibido) {
+    if (Movimientos) {
+        $.ajax({
+            url: `{{ route("movimientos.update", "") }}/${Movimientos.id}`,
+            method: 'PUT',
+            data: {
+                estado: 'Finalizado',
+                total: total,
+                valorSinImpuesto: valorSinImpuesto,
+                valorImpuesto: valorImpuesto,
+                metodoPago: metodoPago,
+                montoRecibido: montoRecibido,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                alert('Cobro realizado con éxito');
+                limpiarInterfaz();
+            },
+            error: function(error) {
+                console.error('Error al finalizar el cobro:', error);
             }
-        }
+        });
+    } else {
+        alert('No hay un movimiento activo para cobrar');
+    }
+}
 
         function limpiarInterfaz() {
             // Limpiar la tabla de productos
