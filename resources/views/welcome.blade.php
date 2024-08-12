@@ -95,7 +95,7 @@
         <div class="main-content">
             <div class="card">
                 <h2>Bienvenido</h2>
-                <p>Este es tu sistema POS. Aquí puedes gestionar ventas, inventario y más.</p>
+                <p>Este es tu sistema POS. Aquí puedes gestionar ventas, inventario y más...</p>
             </div>
             <div class="card">
                 <h2>Documentación</h2>
