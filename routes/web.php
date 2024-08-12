@@ -35,6 +35,8 @@ Route::get('/buscar-movimientos-pendiente', [App\Http\Controllers\MovimientoCont
 Route::post('MovimientosDetallados/crearPendientes', [App\Http\Controllers\MovimientoController::class, 'CrearMovimientosDetalle'])->name('movimientos.CrearMovimientosDetalle');
 // En routes/web.php o routes/api.php
 Route::get('/movimientos/{id}', [App\Http\Controllers\MovimientoController::class, 'obtener'])->name('movimientos.obtener');
+Route::get('/movimientosdatallados/mostrars/{id}', [App\Http\Controllers\MovimientosdatalladoController::class, 'mostrars'])->name('movimientos.mostrars');
+
 
 Route::post('movimientos/crearPendientes/{users}/{caja}/{TipoMovimiento}', [App\Http\Controllers\MovimientoController::class, 'crearPendientes'])->name('movimientos.crearPendientes');
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

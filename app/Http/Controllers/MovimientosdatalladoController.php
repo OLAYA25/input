@@ -45,8 +45,9 @@ class MovimientosdatalladoController extends Controller
     {
         request()->validate(Movimientosdatallado::$rules);
 
-        $movimientosdatallado = Movimientosdatallado::create($request->all());
+        $movimientosdatallado = Movimientosdatallado::create($request->all()) ;
 
+$movimientosdatallado->load('productos');
         return response()->json($movimientosdatallado);
     }
 
@@ -61,6 +62,15 @@ class MovimientosdatalladoController extends Controller
         $movimientosdatallado = Movimientosdatallado::find($id);
 
         return view('movimientosdatallado.show', compact('movimientosdatallado'));
+    }
+
+    public function mostrars ($id)
+    {
+        $movimientosDetallado = Movimientosdatallado::where('Movimientos_id', $id)
+            ->with('productos') // Aquí solo se referencia la relación directamente
+            ->get();
+        
+        return response()->json($movimientosDetallado);
     }
 
     /**
@@ -101,7 +111,6 @@ class MovimientosdatalladoController extends Controller
     {
         $movimientosdatallado = Movimientosdatallado::find($id)->delete();
 
-        return redirect()->route('movimientosdatallados.index')
-            ->with('success', 'Movimientosdatallado deleted successfully');
+        return "200";
     }
 }

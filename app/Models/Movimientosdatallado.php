@@ -38,7 +38,7 @@ class Movimientosdatallado extends Model
      *
      * @var array
      */
-    protected $fillable = ['Movimientos_id','Producto_id','Cantidad_Ingreso','ValorUnitario','TotalValor','Impuesto_id','Cantidad_Egreso','Valor_Unitario','users_id'];
+    protected $fillable = ['Movimientos_id','Producto_id','Cantidad_Ingreso','ValorUnitario','TotalValor','Impuesto_id','Cantidad_Egreso','Valor_Unitario','Obervacion','users_id'];
 
 
     /**
@@ -57,9 +57,14 @@ class Movimientosdatallado extends Model
         return $this->hasOne('App\Models\Movimiento', 'id', 'Movimientos_id');
     }
     
+    public function products()
+    {
+        return $this->hasOne('App\Models\Producto', 'id', 'Producto_id');
+    }
+    
     public function productos()
     {
-        return $this->hasOne('App\Models\Producto', 'id', 'Impuesto_id');
+        return $this->belongsTo('App\Models\Producto', 'Producto_id', 'id');
     }
     
 
