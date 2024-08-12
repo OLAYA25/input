@@ -29,7 +29,7 @@ Route::get('/proveedores/BuscarProveedor', [App\Http\Controllers\ProveedoreContr
 Route::get('/buscar-cliente', [App\Http\Controllers\UsuariobasicoController::class, 'buscar'])->name('cliente.buscar');
 Route::get('/buscar-producto', [App\Http\Controllers\ProductoController::class, 'buscar'])->name('producto.buscar');
 Route::get('/buscar-cuenta', [App\Http\Controllers\CuentaController::class, 'buscar'])->name('cuenta.buscar');
-Route::get('/buscar-movimientos-pendiente', [App\Http\Controllers\MovimientoController::class, 'pendientes'])->name('movimientos.pendientes');
+Route::get('/buscar-movimientos-pendiente/{caja}/{movimiento}/{users}', [App\Http\Controllers\MovimientoController::class, 'pendientes'])->name('movimientos.pendientes');
 
 
 Route::post('MovimientosDetallados/crearPendientes', [App\Http\Controllers\MovimientoController::class, 'CrearMovimientosDetalle'])->name('movimientos.CrearMovimientosDetalle');

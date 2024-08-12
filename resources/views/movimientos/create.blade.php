@@ -299,7 +299,26 @@
             </div>
         </div>
     </div>
-
+     <!-- Modal para movimientos Cierre -->
+    <div id="movimientosModal" class="modal fade" tabindex="-1" aria-labelledby="movimientosModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="movimientosModalLabel">Movimientos Pendientes</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Aquí se cargarán los movimientos pendientes -->
+                    <div id="movimientosContent" class="table-responsive">
+                        <!-- El contenido de la tabla se carga dinámicamente -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+</div>
     <!-- Modal para movimientos pendientes -->
     <div class="modal fade" id="pendientesModal" tabindex="-1" aria-labelledby="pendientesModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
@@ -401,6 +420,21 @@
 
     <script>
     $(document).ready(function () {// Inicializa DataTable
+        $(document).on('keydown', function(event) {
+        // Verificar si se presiona Control y X al mismo tiempo
+        if (event.ctrlKey && event.key === 'd') {
+            event.preventDefault(); // Prevenir el comportamiento por defecto de la combinación de teclas
+            buscarMovimientosPendientes(); // Llamar a la función para buscar los movimientos
+        }
+        if (event.ctrlKey && event.key === 'x') {
+            event.preventDefault(); // Prevenir el comportamiento por defecto de la combinación de teclas
+            buscarMovimientosPendientes(); // Llamar a la función para buscar los movimientos
+        }
+        if (event.ctrlKey && event.key === 'y') {
+            event.preventDefault(); // Prevenir el comportamiento por defecto de la combinación de teclas
+            buscarMovimientosPendientes(); // Llamar a la función para buscar los movimientos
+        }
+    });
     var table = $('#ventasTable').DataTable({
         responsive: true, 
         "language": {
@@ -481,10 +515,12 @@
                 success: function (response) {
                     // Actualizar el total de la fila
                     var nuevoTotal = cantidadIngreso * precioUnitario;
+                    console.log(nuevoTotal);
+                    
                     row.find('.total').text(nuevoTotal.toFixed(2));
 
                     // Recalcular y actualizar totales
-                    actualizarTotales();
+                    window.actualizarTotales();
                 },
                 error: function (error) {
                     console.error('Error al actualizar el movimiento:', error);
@@ -528,9 +564,7 @@
                 },
                 success: function (response) {
                     // Actualizar el total de la fila
-                    var nuevoTotal = cantidadEgreso * precioUnitario;
-                    row.find('.total').text(nuevoTotal.toFixed(2));
-
+                  
                     // Recalcular y actualizar totales
                     actualizarTotales();
                 },
@@ -648,8 +682,8 @@
 
         function mostrarResultados(resultados) {
             const html = resultados.map(item =>
-                `<div class="search-item" data-id="${item.id}" data-nombre="${item.RazonSocial || item.Nombre || item.NumeroDocumento || item.Nombre1 + " " + item.Nombre2 + " " + item.Apellido1 + " " + item.Apeelido2 || item.Descripcion}">
-                    ${item.RazonSocial || item.NumeroDocumento || item.Nombre1 + " " + item.Nombre2 + " " + item.Apellido1 + " " + item.Apeelido2 || item.Descripcion} - ${item.NDocumento || item.NumeroDocumento}
+                `<div class="search-item" data-id="${item.id}" data-nombre="${ item.RazonSocial || item.Nombre || item.NumeroDocumento|| item.descripcion || item.Nombre1 + " " + item.Nombre2 + " " + item.Apellido1 + " " + item.Apeelido2 || item.Descripcion || item.descripcion}">
+                    ${item.descripcion || item.RazonSocial || item.NumeroDocumento || item.Nombre1 + " " + item.Nombre2 + " " + item.Apellido1 + " " + item.Apeelido2 || item.Descripcion} - ${item.NDocumento || item.NumeroDocumento || item.numero}
                 </div>`
             ).join('');
             $('#searchResults').html(html);
@@ -778,7 +812,8 @@
                     OrigenProveedor_id: proveedor,
                     UsuarioDestino_id: usuarioDestino,
                     DestinoBodega_id: destinoBodega,
-                    estado: 'Pendiente'
+                    estado: 'Pendiente',
+                    estadoMovimientosCaja:'EnEjecucion'
                 };
 
                 fetch('{{Route("movimientos.CrearMovimientosDetalle")}}', {
@@ -799,6 +834,7 @@
         }
 
         function CrearMovimiento(Movimientos_ids, Producto_ids, Cantidad_Ingresos, Valor_Unitarios, TotalValors, Impuesto_ids, Cantidad_Egresos, users_ids) {
+            
             return new Promise((resolve, reject) => {
                 const data = {
                     Movimientos_id: Movimientos_ids,
@@ -849,7 +885,7 @@
                     producto.id,
                     cantidI,
                     producto.precio,
-                    producto.precio * cantidI,
+                    producto.precio * cantidI ||  producto.precio * cantidE ,
                     '',
                     cantidE,
                     {{ $users }}
@@ -877,46 +913,70 @@
 
 
     $(document).on('click', '.eliminar', function () {
-        $(this).closest('tr').remove();
-        actualizarTotales();
+    var table = $('#ventasTable').DataTable();
+    table
+        .row($(this).parents('tr'))
+        .remove()
+        .draw();
+    actualizarTotales();
+    
+});
+
+window.actualizarTotales = async function () {
+    let totalUnidades = 0, totalFilas = 0, totalGeneral = 0;
+    
+    // Obtener las filas como nodos DOM
+    var rows = $('#ventasTable').DataTable().rows().nodes();
+    
+    $(rows).each(function (index, row) {
+        // Aquí suponemos que las cantidades de ingreso y egreso están en inputs en la 3ª y 4ª columna respectivamente
+        const cantidadIngreso = parseInt($(row).find('td:eq(2) input').val()) || 0;
+        const cantidadEgreso = parseInt($(row).find('td:eq(3) input').val()) || 0;
+        
+        const total = parseFloat($(row).find('td:eq(5)').text().replace(/[^0-9.-]+/g,"")) || 0;
+        console.log(total);
+        
+        console.log("Fila", index + 1, " - Cantidad Ingreso:", cantidadIngreso, " - Cantidad Egreso:", cantidadEgreso, " - Total:", total);
+        
+        totalUnidades += cantidadIngreso + cantidadEgreso;
+        totalGeneral += total;
+        totalFilas++;
     });
 
-    function actualizarTotales() {
-        let totalUnidades = 0, totalFilas = 0, totalGeneral = 0;
-        $('#ventasTable tbody tr').each(function () {
-            totalFilas++;
-            const cantidadIngreso = parseInt($(this).find('input.cantidadI').val()) || 0;
-            const cantidadEgreso = parseInt($(this).find('input.cantidad').val()) || 0;
-            const total = parseFloat($(this).find('.total').text()) || 0;
-            totalUnidades += cantidadIngreso + cantidadEgreso;
-            totalGeneral += total;
-        });
-        $('#rowCount').text(totalFilas);
-        $('#unitCount').text(totalUnidades);
-        $('#grandTotal').text('$' + totalGeneral.toFixed(2));
-    }
+    console.log("Total Unidades:", totalUnidades);
+    console.log("Total General:", totalGeneral);
+
+    // Actualizar los totales en el DOM
+    $('#rowCount').text(totalFilas);
+    $('#unitCount').text(totalUnidades);
+    $('#grandTotal').text('$' + totalGeneral.toFixed(2));
+}
+
+
+
 
     // Buscar movimientos pendientes
     $('#buscarPendientesBtn').on('click', buscarMovimientosPendientes);
 
-    function buscarMovimientosPendientes() {
-        $.ajax({
-            url: '{{ route("movimientos.pendientes") }}',
-            method: 'GET',
-            success: function (data) {
-                mostrarMovimientosPendientes(data);
-                console.log(data);
+   function buscarMovimientosPendientes() {
+    $.ajax({
+        url: '{{ route("movimientos.pendientes", ["caja" => $caja->id, "movimiento" => 1, "users" => $users]) }}',
+        method: 'GET',
+        success: function (data) {
+            mostrarMovimientosPendientes(data);
+            console.log(data);
+        },
+        error: function (error) {
+            console.error('Error al buscar movimientos pendientes:', error);
+        }
+    });
+}
 
-            },
-            error: function (error) {
-                console.error('Error al buscar movimientos pendientes:', error);
-            }
-        });
-    }
 
     function mostrarMovimientosPendientes(movimientos) {
         let html = '';
-
+        console.log(movimientos);
+        
         // Verificar si movimientos es un array
         if (Array.isArray(movimientos)) {
             movimientos.forEach(movimiento => {
@@ -983,6 +1043,8 @@
         });
     }
     function mostrarMovimientosPendientes(movimientos) {
+        console.log(movimientos);
+        
         let htmlMovimientos = '';
 
         movimientos.forEach(movimiento => {
@@ -1108,7 +1170,7 @@
         $('#CajaOnput').val(movimiento.Cuenta_Salida);
 
         // Limpiar la tabla de productos actual
-        $('#ventasTable tbody').empty();
+        $('#ventasTable').DataTable().clear().draw();
 
         // Cargar los productos del movimiento
         if (movimiento.movimientosdatallados && Array.isArray(movimiento.movimientosdatallados)) {
@@ -1124,11 +1186,11 @@
         const newRow = {
         Producto_id: detalle.Producto_id,
         Descripcion: detalle.productos.Descripcion || 'N/A',
-        Cantidad_Egreso: `<input type="number" class="form-control cantidad" onchange="updateCuentaE(event, ${detalle.id})" value="${detalle.Cantidad_Egreso}" min="0">`,
-        Cantidad_Ingreso: `<input type="number" class="form-control cantidadI" onchange="updateCuentaI(event, ${detalle.id})" value="${detalle.Cantidad_Ingreso}" min="0">`,
+        Cantidad_Egreso: `<input type="number" class="form-control cantidad" onkeyup="updateCuentaE(event, ${detalle.id})" value="${detalle.Cantidad_Egreso}" min="0">`,
+        Cantidad_Ingreso: `<input type="number" class="form-control cantidadI" onkeyup="updateCuentaI(event, ${detalle.id})" value="${detalle.Cantidad_Ingreso}" min="0">`,
         Valor_Unitario: detalle.Valor_Unitario,
-        TotalValor: detalle.TotalValor,
-        Observacion: `<input type="text" class="form-control cantidadI" onchange="Observacion(event, ${detalle.id})" value="${detalle.Observacion || ''}" min="0">`,
+        TotalValor:`  <div class="total" >${detalle.TotalValor}</div>`,
+        Observacion: `<input type="text" class="form-control" onchange="Observacion(event, ${detalle.id})" value="${detalle.Observacion || ''}" min="0">`,
         Acciones: `<button onclick="EliminarDetalle(${detalle.id})" class="btn btn-danger  btn-sm eliminar"><i class="fas fa-trash"></i></button>`
     };
 
@@ -1171,27 +1233,17 @@
     }
 
     // Actualiza esta función si es necesario
-    function actualizarTotales() {
-        let totalUnidades = 0, totalFilas = 0, totalGeneral = 0;
-        $('#ventasTable tbody tr').each(function () {
-            totalFilas++;
-            const cantidad = parseInt($(this).find('.cantidad').val());
-            const total = parseFloat($(this).find('.total').text());
-            totalUnidades += cantidad;
-            totalGeneral += total;
-        });
-        $('#rowCount').text(totalFilas);
-        $('#unitCount').text(totalUnidades);
-        $('#grandTotal').text('$' + totalGeneral.toFixed(2));
-    }
+
     // Finalizar movimiento
     $('#finalizarMovimientoBtn').on('click', function () {
         if (Movimientos) {
+            var valorTotal = $('#grandTotal').val();
             $.ajax({
                 url: `{{ route("movimientos.update", "") }}/${Movimientos.id}`,
                 method: 'PUT',
                 data: {
                     estado: 'Finalizado',
+                    Total :valorTotal,
                     _token: '{{ csrf_token() }}'
                 },
                 success: function (response) {
@@ -1235,7 +1287,11 @@
                         <div class="form-group mb-3">
                             <label for="montoRecibido" class="form-label">Monto recibido:</label>
                             <input type="number" class="form-control form-control-lg" id="montoRecibido" placeholder="Ingrese el monto recibido">
-                        </div>
+                            <label for="ObservacionesMovimientos" class="form-label">Observaciones:</label>
+                            <input type="text" class="form-control form-control-lg" id="ObservacionesMovimientos" placeholder="Observaciones>
+                            
+                            
+                            </div>
                         <h3 class="mt-4">Cambio a devolver: $<span id="cambioADevolver">0.00</span></h3>
                         <p>Valor sin Impuesto: $${valorSinImpuesto.toFixed(2)}</p>
                         <p>Valor Impuesto: $${valorImpuesto.toFixed(2)}</p>
@@ -1271,6 +1327,7 @@
 
         $('#confirmarCobroBtn').on('click', function () {
             let metodoPago = $('#metodoPago').val();
+            let ObservacionesMovi = $('#ObservacionesMovimientos').val();
             let montoRecibido = parseFloat($('#montoRecibido').val()) || 0;
             if (montoRecibido >= totalGeneral) {
                 finalizarCobro(totalGeneral, valorSinImpuesto, valorImpuesto, metodoPago, montoRecibido);
@@ -1281,18 +1338,19 @@
         });
     }
 
-    function finalizarCobro(total, valorSinImpuesto, valorImpuesto, metodoPago, montoRecibido) {
+    function finalizarCobro(total, valorSinImpuesto, valorImpuesto, metodoPago, montoRecibido,Observacion) {
         if (Movimientos) {
             $.ajax({
                 url: `{{ route("movimientos.update", "") }}/${Movimientos.id}`,
                 method: 'PUT',
                 data: {
                     estado: 'Finalizado',
-                    total: total,
-                    valorSinImpuesto: valorSinImpuesto,
-                    valorImpuesto: valorImpuesto,
+                    Total: total,
+                    ValorSinImpuesto: valorSinImpuesto,
+                    ValorImpuesto: valorImpuesto,
                     metodoPago: metodoPago,
                     montoRecibido: montoRecibido,
+                    Observacion: Observacion,
                     _token: '{{ csrf_token() }}'
                 },
                 success: function (response) {
@@ -1312,7 +1370,7 @@
 
     function limpiarInterfaz() {
         // Limpiar la tabla de productos
-        $('#ventasTable tbody').empty();
+        $('#ventasTable').DataTable().clear().draw();
         // Resetear totales
         $('#rowCount').text('0');
         $('#unitCount').text('0');

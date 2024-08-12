@@ -48,8 +48,13 @@ class Movimiento extends Model
      *
      * @var array
      */
-    protected $fillable = ['TipoMovimiento_id','OrigenBodega_id','OrigenProveedor_id','UsuarioDestino_id','DestinoBodega_id','users_id','Caja_id','Cuenta_id','ValorImpuesto','ValorSinImpuesto','Total','Cuenta_Salida','Cuenta_Entrada','estado','update_at'];
-
+    protected $fillable = ['TipoMovimiento_id','OrigenBodega_id',
+                                'OrigenProveedor_id','UsuarioDestino_id','DestinoBodega_id',
+                                'users_id','Caja_id','Cuenta_id','ValorImpuesto',
+                                'ValorSinImpuesto','Total','Cuenta_Salida',
+                                'Cuenta_Entrada','estado','update_at',
+                                'estadoMovimientosCaja','metodoPago','montoRecibido','Observacion'];
+   
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne

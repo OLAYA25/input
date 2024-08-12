@@ -33,8 +33,19 @@ class MovimientoController extends Controller
             // Guarda el movimiento y devuelve una respuesta JSON
             return response()->json($movimiento);
         }
-        public function pendientes(){
-            $movimiento = Movimiento::where('estado','Pendiente')->get();
+        
+        public function pendientes($idCaja,$movimientos,$users){
+            $movimiento=null;
+            if ($movimientos ==1) {
+                $movimiento = Movimiento::where('estado','Pendiente')->where('Caja_id',$idCaja)->get();
+            }if ($movimientos == 2) {
+                $movimiento = Movimiento::where('estado','Cierre')->where('Caja_id',$idCaja)->get();
+            }if ($movimientos == 3) {
+                $movimiento = Movimiento::where('estadoMovimientosCaja','EnEjecucion')->where('Caja_id',$idCaja)->where('users_id',$users)->get();
+            }if ($movimientos == 4) {
+                $movimiento = Movimiento::where('estadoMovimientosCaja','EnEjecucion')->where('Caja_id',$idCaja)->get();
+            }
+           
             // Guarda el movimiento y devuelve una respuesta JSON
             return response()->json($movimiento);
         }
