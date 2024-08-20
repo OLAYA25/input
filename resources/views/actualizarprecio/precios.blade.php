@@ -81,7 +81,7 @@ $impuestosProductos = ImpuestosProducto::where('productos_id',$producto->id)->ge
 
                 <div class="form-group col-sm-2">
                     <label for="ValorBase">Publico+Impuesto</label>
-                    <input class="form-control" onchange="ImpuestoPublico(event)" value="{{ isset($precioActual) ? ($precioActual->ValorPublico + ($valortotal != 0 ? number_format(($precioActual->ValorBase /100) * $valortotal, 2) : 0)) : 0 }}" placeholder="Base"
+                    <input class="form-control" onchange="ImpuestoPublico(event)" value="{{ isset($precioActual) ? (floatval($precioActual->ValorPublico) + ($valortotal != 0 ? floatval(number_format(($precioActual->ValorBase /100) * $valortotal, 2)) : 0)) : 0 }}" placeholder="Base"
                         name="ImpuestoPublico" type="number" id="ValorPublicoConImpuestos">
                 </div>
 
