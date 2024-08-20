@@ -476,51 +476,54 @@
         </button>
         <!--===================================================-->
     </div>
-
+    <script>var CSRF = '{{ csrf_token() }}';</script>
+    <!-- Scripts principales -->
     <script src="{{asset('../resources/js/jquery.min.js')}}"></script>
     <script src="{{asset('../resources/js/bootstrap.min.js')}}"></script>
     <script src="{{asset('../resources/js/nifty.min.js')}}"></script>
-        
-    <!--Demo script [ DEMONSTRATION ]-->
+    
+    <!-- Scripts de demostración y plugins -->
     <script src="{{asset('../resources/js/demo/nifty-demo.min.js')}}"></script>
-    <!--BootstrapJS [ RECOMMENDED ]-->
     <script src="{{asset('../resources/plugins/fooTable/dist/footable.all.min.js')}}"></script>
     <script src="{{asset('../resources/plugins/morris-js/morris.min.js')}}"></script>
-	<script src="{{asset('../resources/plugins/morris-js/raphael-js/raphael.min.js')}}"></script>
-    <!--FooTable Example [ SAMPLE ]-->
-
-   
+    <script src="{{asset('../resources/plugins/morris-js/raphael-js/raphael.min.js')}}"></script>
+    
+    <!-- DataTables y sus extensiones -->
     <script src="{{asset('../resources/plugins/datatables/media/js/jquery.dataTables.js')}}"></script>
-
     <script src="{{asset('../resources/plugins/datatables/media/js/dataTables.bootstrap.js')}}"></script>
-	<script src="{{asset('../resources/plugins/datatables/extensions/Responsive/js/dataTables.responsive.min.js')}}"></script>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    <script src=" https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+    <script src="{{asset('../resources/plugins/datatables/extensions/Responsive/js/dataTables.responsive.min.js')}}"></script>
     <script src="https://cdn.datatables.net/buttons/2.3.2/js/dataTables.buttons.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.3.2/js/buttons.html5.min.js"></script>
-
-    <script src="https://cdn.datatables.net/responsive/2.4.0/js/dataTables.responsive.min.js"></script>
-        <script src="https://cdn.datatables.net/responsive/2.4.0/js/responsive.bootstrap4.min.js"></script>
-    <script> var datatable= jQuery.noConflict();</script>
-    <script src="{{asset('../resources/js/datatable.js')}}"></script>
-<script>var CSRF = '{{ csrf_token() }}';</script>
+    <script src="https://cdn.datatables.net/responsive/2.4.0/js/responsive.bootstrap4.min.js"></script>
     
-    <!--Sparkline [ OPTIONAL ]-->
-    <script src="{{asset('../resources/js/jquery.min.js')}}"></script>
-    <!--Specify page [ SAMPLE ]-->
+    <!-- Configuración de DataTables -->
+    <script>
+    $(document).ready(function() {
+        $('table').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json'
+            }
+        });
+    });
+    </script>
+    
+    <!-- Token CSRF -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script>var CSRF = '{{ csrf_token() }}';</script>
+    
+    <!-- Scripts adicionales -->
     <script src="{{asset('../resources/js/demo/dashboard.js')}}"></script>
     <script src="{{asset('../resources/js/input.js')}}"></script>
     <script src="{{asset('../resources/plugins/pace/pace.min.js')}}"></script>
+    
+    <!-- Scripts de Flot Charts -->
     <script src="{{asset('../resources/plugins/flot-charts/jquery.flot.min.js')}}"></script>
-	<script src="{{asset('../resources/plugins/flot-charts/jquery.flot.resize.min.js')}}"></script>
-	<script src="{{asset('../resources/plugins/flot-charts/jquery.flot.tooltip.min.js')}}"></script>
+    <script src="{{asset('../resources/plugins/flot-charts/jquery.flot.resize.min.js')}}"></script>
+    <script src="{{asset('../resources/plugins/flot-charts/jquery.flot.tooltip.min.js')}}"></script>
     <script src="{{asset('../resources/plugins/flot-charts/jquery.flot.categories.min.js')}}"></script>
     <script src="{{asset('../resources/plugins/flot-charts/jquery.flot.orderBars.min.js')}}"></script>
-    <script src="{{asset('../resources/plugins/flot-charts/jquery.flot.resize.min.js')}}"></script>
 
 </body>
 

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('template_title')
-    Impuesto
+    Impuestos Producto
 @endsection
 
 @section('content')
@@ -13,11 +13,11 @@
                         <div style="display: flex; justify-content: space-between; align-items: center;">
 
                             <span id="card_title">
-                                {{ __('Impuesto') }}
+                                {{ __('Impuestos Producto') }}
                             </span>
 
                              <div class="float-right">
-                                <a href="{{ route('impuestos.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
+                                <a href="{{ route('impuestos-productos.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
                                   {{ __('Create New') }}
                                 </a>
                               </div>
@@ -30,10 +30,12 @@
                     @endif
 
                     <div class="card-body">
-                    @include("impuesto.table")
+                        
+                            @include('impuestos-producto.table')
+                       
                     </div>
                 </div>
-                {!! $impuestos->links() !!}
+                {!! $impuestosProductos->links() !!}
             </div>
         </div>
     </div>

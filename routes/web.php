@@ -57,3 +57,4 @@ Route::resource('productos',App\Http\Controllers\ProductoController::class);
 Route::resource('impuestos',App\Http\Controllers\ImpuestoController::class);
 Route::resource('movimientosdatallados',App\Http\Controllers\MovimientosdatalladoController::class);
 Route::resource('actualizarprecios',App\Http\Controllers\ActualizarprecioController::class);
+Route::resource('impuestos-productos',App\Http\Controllers\ImpuestosProductoController::class);

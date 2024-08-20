@@ -26,7 +26,7 @@
                     <td>{{ $actualizarprecio->id }}</td>
                     
                     <td>{{ $actualizarprecio->producto->Descripcion ?? null}}</td>
-                    <td>{{ $actualizarprecio->impuesto->Descripcion ?? null }}</td>
+                    <td>{{ $actualizarprecio->Impuesto_id ?? null }}</td>
                     <td>{{ $actualizarprecio->Principal }}</td>
                     <td>{{ $actualizarprecio->ValorBase }}</td>
                     <td>{{ $actualizarprecio->Proveedor_id }}</td>

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Movimiento;
+use App\Models\Movimientosdatallado;
+use App\Models\Bodegasproducto;
 use Illuminate\Http\Request;
 
 /**
@@ -122,13 +124,53 @@ class MovimientoController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Movimiento $movimiento)
-    {
-        request()->validate(Movimiento::$rules);
+{
+    $request->validate(Movimiento::$rules);
+    
+    if ($request->estado === 'Finalizado') {
+        $detalles = Movimientosdatallado::where('Movimientos_id',  $movimiento->id)->get();
 
+        foreach ($detalles as $detalle) {
+            $totalMovimiento = $detalle->Cantidad_Ingreso - $detalle->Cantidad_Egreso;
+
+            // Actualizar Origen Bodega
+            $this->updateBodegaProducto($detalle, $movimiento->OrigenBodega_id, $totalMovimiento);
+
+            // Actualizar Destino Bodega
+            $this->updateBodegaProducto($detalle, $movimiento->DestinoBodega_id, $totalMovimiento);
+        }
+    } else {
         $movimiento->update($request->all());
-
-        return response()->json($movimiento);
     }
+
+    return response()->json($movimiento);
+}
+
+private function updateBodegaProducto($detalle, $bodegaId, $totalMovimiento)
+{
+    // Buscar si existe un registro para la bodega y el producto
+    $bodegaProducto = Bodegasproducto::where('Bodega', $bodegaId)
+                                      ->where('Producto', $detalle->Producto_id)
+                                      ->first();
+
+    if ($bodegaProducto) {
+        // Si el producto ya existe en la bodega, actualiza la cantidad
+        $bodegaProducto->Cantidad += $totalMovimiento;
+    } else {
+        // Si no existe, crea un nuevo registro con la cantidad
+        $bodegaProducto = new Bodegasproducto([
+            'Producto' => $detalle->Producto_id,
+            'Cantidad' => $totalMovimiento,
+            'Bodega'   => $bodegaId,
+            'estado'   => 'Activo',
+        ]);
+    }
+
+    // Guardar los cambios en la base de datos
+    $bodegaProducto->save();
+    return $bodegaProducto;
+}
+
 
     /**
      * @param int $id

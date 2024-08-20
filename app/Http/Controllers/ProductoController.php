@@ -34,7 +34,9 @@ class ProductoController extends Controller
                 $query->where('Descripcion', 'LIKE', "%$termino%")
                       ->orWhere('NumeroSerial', 'LIKE', "%$termino%");
             })
-            ->with(['producto.actualizarprecios']) // Carga la relación 'producto'
+            ->with(['producto.actualizarprecios' => function($query) {
+                $query->where('Principal', 1);
+            }])
             ->get();
     
         return response()->json($productos);

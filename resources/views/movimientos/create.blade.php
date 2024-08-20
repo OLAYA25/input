@@ -239,8 +239,10 @@
                             <th>Descripción</th>
                             <th>Cantidad E</th>
                             <th>Cantidad I</th>
+                            <th>Descuento</th>
                             <th>Precio</th>
                             <th>Total</th>
+                            
                             <th>Observacion</th>
                             <th>Acciones</th>
                         </tr>
@@ -467,6 +469,7 @@
             { data: 'Descripcion' },
             { data: 'Cantidad_Egreso' },
             { data: 'Cantidad_Ingreso' },
+            { data: 'Descuento' },
             { data: 'Valor_Unitario' },
             { data: 'TotalValor' },
             { data: 'Observacion' },
@@ -498,12 +501,11 @@
 
 
     
-
         window.updateCuentaI = async function (event, id) {
             var inputElement = event.target;
-            var cantidadIngreso = inputElement.value;
+            var cantidadIngreso = parseFloat(inputElement.value) || 0;
             var row = $(inputElement).closest('tr');
-            var precioUnitario = parseFloat(row.find('td:eq(4)').text());
+            var precioUnitario = parseFloat(row.find('td:eq(5) input').val()) || 0;
 
             $.ajax({
                 url: `{{ route("movimientosdatallados.update", "") }}/${id}`,
@@ -515,12 +517,10 @@
                 success: function (response) {
                     // Actualizar el total de la fila
                     var nuevoTotal = cantidadIngreso * precioUnitario;
-                    console.log(nuevoTotal);
-                    
                     row.find('.total').text(nuevoTotal.toFixed(2));
 
                     // Recalcular y actualizar totales
-                    window.actualizarTotales();
+                    actualizarTotales();
                 },
                 error: function (error) {
                     console.error('Error al actualizar el movimiento:', error);
@@ -528,11 +528,47 @@
             });
         }
 
+        window.updateCuentaE = async function (event, id) {
+            var inputElement = event.target;
+            var cantidadEgreso = parseFloat(inputElement.value) || 0;
+            var row = $(inputElement).closest('tr');
+            var precioUnitario = parseFloat(row.find('td:eq(5) input').val()) || 0;
+
+            $.ajax({
+                url: `{{ route("movimientosdatallados.update", "") }}/${id}`,
+                method: 'PATCH',
+                data: {
+                    Cantidad_Egreso: cantidadEgreso,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function (response) {
+                    // Actualizar el total de la fila
+                    var nuevoTotal = cantidadEgreso * precioUnitario;
+                    row.find('.total').text(nuevoTotal.toFixed(2));
+
+                    // Recalcular y actualizar totales
+                    actualizarTotales();
+                },
+                error: function (error) {
+                    console.error('Error al actualizar el movimiento:', error);
+                }
+            });
+        }
+
+        function actualizarTotales() {
+            var total = 0;
+            $('#ventasTable tbody tr').each(function() {
+                var valorTotal = parseFloat($(this).find('.total').text()) || 0;
+                total += valorTotal;
+            });
+            $('#totalGeneral').text(total.toFixed(2));
+        }
+
         window.Observacion = async function (event, id) {
             var inputElement = event.target;
             var cantidadEgreso = inputElement.value;
             var row = $(inputElement).closest('tr');
-            var precioUnitario = parseFloat(row.find('td:eq(4)').text());
+            var precioUnitario = parseFloat(row.find('td:eq(5) input ').val());
 
             $.ajax({
                 url: `{{ route("movimientosdatallados.update", "") }}/${id}`,
@@ -573,32 +609,21 @@
                 }
             });
         }
-        window.updateCuentaE = async function (event, id) {
+        window.Descuentos = async function (event, id) {
             var inputElement = event.target;
-            var cantidadEgreso = inputElement.value;
+            var descuento = parseFloat(inputElement.value) || 0;
             var row = $(inputElement).closest('tr');
-            var precioUnitario = parseFloat(row.find('td:eq(4)').text());
-
-            $.ajax({
-                url: `{{ route("movimientosdatallados.update", "") }}/${id}`,
-                method: 'PATCH',
-                data: {
-                    Cantidad_Egreso: cantidadEgreso,
-                    _token: '{{ csrf_token() }}'
-                },
-                success: function (response) {
-                    // Actualizar el total de la fila
-                    var nuevoTotal = cantidadEgreso * precioUnitario;
-                    row.find('.total').text(nuevoTotal.toFixed(2));
-
-                    // Recalcular y actualizar totales
-                    actualizarTotales();
-                },
-                error: function (error) {
-                    console.error('Error al actualizar el movimiento:', error);
-                }
-            });
+            var precioUnitario = parseFloat(row.find('td:eq(5) input').val());
+            var cantidad = parseFloat(row.find('td:eq(2) input').val()) || parseFloat(row.find('td:eq(3) input').val()) || 1;
+            
+            var precioConDescuento = precioUnitario - descuento;
+            var nuevoTotal = precioConDescuento * cantidad;
+            
+            row.find('.total').text(nuevoTotal.toFixed(2));
+            
+            actualizarTotales();
         }
+       
 
 
 
@@ -739,13 +764,14 @@
                     url: '{{ route("producto.buscar") }}',
                     data: { term: request.term },
                     success: function (data) {
+                        
                         response(data.map(function (item) {
                             return {
                                 label: `${item.Descripcion} - ${item.producto.id} - ${item.producto.Descripcion}`,
                                 value: item.producto.Descripcion,
                                 id: item.producto.id,
                                 codigo: item.Codigo,
-                                precio: item.producto.actualizarprecios[0].ValorPublico
+                                precio: item.producto.actualizarprecios && item.producto.actualizarprecios[0] ? item.producto.actualizarprecios[0].ImpuestoPublico : 0
                             };
                         }));
                     },
@@ -833,7 +859,7 @@
             });
         }
 
-        function CrearMovimiento(Movimientos_ids, Producto_ids, Cantidad_Ingresos, Valor_Unitarios, TotalValors, Impuesto_ids, Cantidad_Egresos, users_ids) {
+        function CrearMovimiento(Movimientos_ids, Producto_ids, Cantidad_Ingresos,Descuento, Valor_Unitarios, TotalValors, Impuesto_ids, Cantidad_Egresos, users_ids) {
             
             return new Promise((resolve, reject) => {
                 const data = {
@@ -842,6 +868,7 @@
                     Cantidad_Ingreso: Cantidad_Ingresos,
                     Valor_Unitario: Valor_Unitarios,
                     TotalValor: TotalValors,
+                    Descuento:Descuento,
                     Impuesto_id: Impuesto_ids,
                     Cantidad_Egreso: Cantidad_Egresos,
                     users_id: users_ids,
@@ -884,6 +911,7 @@
                     Movimientos.id,
                     producto.id,
                     cantidI,
+                    Descuento,
                     producto.precio,
                     producto.precio * cantidI ||  producto.precio * cantidE ,
                     '',
@@ -929,18 +957,20 @@ window.actualizarTotales = async function () {
     var rows = $('#ventasTable').DataTable().rows().nodes();
     
     $(rows).each(function (index, row) {
-        // Aquí suponemos que las cantidades de ingreso y egreso están en inputs en la 3ª y 4ª columna respectivamente
-        const cantidadIngreso = parseInt($(row).find('td:eq(2) input').val()) || 0;
-        const cantidadEgreso = parseInt($(row).find('td:eq(3) input').val()) || 0;
+        const cantidadIngreso = parseFloat($(row).find('td:eq(2) input').val()) || 0;
+        const cantidadEgreso = parseFloat($(row).find('td:eq(3) input').val()) || 0;
+        const valorUnitario = parseFloat($(row).find('td:eq(5) input').val()) || 0;
         
-        const total = parseFloat($(row).find('td:eq(5)').text().replace(/[^0-9.-]+/g,"")) || 0;
-        console.log(total);
+        const total = (cantidadIngreso + cantidadEgreso) * valorUnitario;
         
-        console.log("Fila", index + 1, " - Cantidad Ingreso:", cantidadIngreso, " - Cantidad Egreso:", cantidadEgreso, " - Total:", total);
+        console.log("Fila", index + 1, " - Cantidad Ingreso:", cantidadIngreso, " - Cantidad Egreso:", cantidadEgreso, " - Valor Unitario:", valorUnitario, " - Total:", total);
         
         totalUnidades += cantidadIngreso + cantidadEgreso;
         totalGeneral += total;
         totalFilas++;
+        
+        // Actualizar el total en la fila
+        $(row).find('.total').text(total.toFixed(2));
     });
 
     console.log("Total Unidades:", totalUnidades);
@@ -950,7 +980,20 @@ window.actualizarTotales = async function () {
     $('#rowCount').text(totalFilas);
     $('#unitCount').text(totalUnidades);
     $('#grandTotal').text('$' + totalGeneral.toFixed(2));
+    
+    // Forzar actualización de la tabla
+    $('#ventasTable').DataTable().draw(false);
 }
+
+// Llamar a actualizarTotales después de cualquier cambio en la tabla
+$(document).on('input', '#ventasTable input', function() {
+    actualizarTotales();
+});
+
+// Llamar a actualizarTotales después de agregar o eliminar filas
+$('#ventasTable').on('draw.dt', function() {
+    actualizarTotales();
+});
 
 
 
@@ -1183,12 +1226,15 @@ window.actualizarTotales = async function () {
     }
 
     function agregarProductoATabla(detalle) {
+        console.log(detalle);
         const newRow = {
         Producto_id: detalle.Producto_id,
         Descripcion: detalle.productos.Descripcion || 'N/A',
         Cantidad_Egreso: `<input type="number" class="form-control cantidad" onkeyup="updateCuentaE(event, ${detalle.id})" value="${detalle.Cantidad_Egreso}" min="0">`,
         Cantidad_Ingreso: `<input type="number" class="form-control cantidadI" onkeyup="updateCuentaI(event, ${detalle.id})" value="${detalle.Cantidad_Ingreso}" min="0">`,
-        Valor_Unitario: detalle.Valor_Unitario,
+        Descuento: `<input type="number" class="form-control descuento" onkeyup="Descuentos(event, ${detalle.Descuento})" value="${detalle.Descuento}" min="0">`,
+        
+        Valor_Unitario: `<input type="number" class="form-control  " onkeyup="updateCuentaE(event, ${detalle.Descuento})" value="${detalle.Valor_Unitario}" min="0">`,
         TotalValor:`  <div class="total" >${detalle.TotalValor}</div>`,
         Observacion: `<input type="text" class="form-control" onchange="Observacion(event, ${detalle.id})" value="${detalle.Observacion || ''}" min="0">`,
         Acciones: `<button onclick="EliminarDetalle(${detalle.id})" class="btn btn-danger  btn-sm eliminar"><i class="fas fa-trash"></i></button>`
@@ -1213,7 +1259,8 @@ window.actualizarTotales = async function () {
         try {
             var cantidI = $("#CantidadIngreso").val();
             var cantidE = $("#CantidadEngreso").val();
-            var cantidI = $("#CantidadIngreso").val();
+            var  cantidI = $("#CantidadIngreso").val();
+            var Descuento= $("#Descuento").val();
             if (cantidI == null || cantidI == "") {
                 cantidI = 1;
             }
@@ -1222,7 +1269,7 @@ window.actualizarTotales = async function () {
                 cantidE = 1;
             }
 
-            const nuevoMovimiento = await CrearMovimiento(Movimientos.id, producto.id, cantidI, producto.precio, producto.precio, '', cantidE, {{ $users }});
+            const nuevoMovimiento = await CrearMovimiento(Movimientos.id, producto.id, cantidI,Descuento ,producto.precio, producto.precio, '', cantidE, {{ $users }});
         agregarProductoATabla(nuevoMovimiento);
     } catch (error) {
         console.error('Error al crear movimiento:', error);

@@ -45,9 +45,16 @@ class ActualizarprecioController extends Controller
     {
         request()->validate(Actualizarprecio::$rules);
 
-        $actualizarprecio = Actualizarprecio::create($request->all());
+        // Actualizar todos los registros existentes con el mismo Producto_id a Principal = false
+        Actualizarprecio::where('Producto_id', $request->Producto_id)
+            ->update(['Principal' => false]);
 
-        return  $actualizarprecio ;
+        // Crear el nuevo registro con Principal = true
+        $nuevoActualizarprecio = new Actualizarprecio($request->all());
+        $nuevoActualizarprecio->Principal = true;
+        $nuevoActualizarprecio->save();
+
+        return $nuevoActualizarprecio;
     }
 
     /**

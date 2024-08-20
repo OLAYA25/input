@@ -40,7 +40,7 @@ class Cuenta extends Model
      *
      * @var array
      */
-    protected $fillable = ['bancos_id','usuario_id','descripcion','tipo','numero','estado'];
+    protected $fillable = ['bancos_id','usuario_id','descripcion','tipo','numero','estado','Valor'];
 
 
     /**

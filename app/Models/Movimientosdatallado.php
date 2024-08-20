@@ -44,10 +44,7 @@ class Movimientosdatallado extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
-    public function impuesto()
-    {
-        return $this->hasOne('App\Models\Impuesto', 'id', 'Impuesto_id');
-    }
+    
     
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
