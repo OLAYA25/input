@@ -19,7 +19,7 @@
                 <td>{{ $codigoalterno->Descripcion }}</td>
                 <td>{{ $codigoalterno->estado }}</td>
                 <td>{{ $codigoalterno->cantidad }}</td>
-                <td>{{ $codigoalterno->producto_id }}</td>
+                <td>{{ $codigoalterno->producto_id }}</td>.
 
                 <td>
                     <form action="{{ route('codigoalternos.destroy',$codigoalterno->id) }}" method="POST">
