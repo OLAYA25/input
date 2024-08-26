@@ -1458,8 +1458,8 @@
                     _token: '{{ csrf_token() }}'
                 },
                 success: function (response) {
-                    alert('Cobro realizado con éxito');
                     
+                    window.location.href = '{{ route("movimientos.pdf", ":id") }}'.replace(':id', response.id) + '?size=carta';
                     limpiarInterfaz();
                 },
                 error: function (error) {
