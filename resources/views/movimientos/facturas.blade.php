@@ -9,7 +9,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Factura</title>
     <style>
-        @import url('{{ asset('../resources/css/reporte.css') }}');
+        @if ($size === 'carta'||$size === 'ofici' )
+            @import url('{{ asset('../resources/css/reportecarta.css') }}');
+        @elseif ($size === 'tirilla')
+            @import url('{{ asset('../resources/css/tirilla.css') }}');
+        @endif
+
     </style>
 </head>
 <body>
@@ -112,7 +117,7 @@
     </table>
 
 
-    <table>
+    <table class="products-table">
         <tr>
             <th>Ítem</th>
             <th>Descripción</th>
@@ -131,24 +136,29 @@
         @endforeach
     </table>
     <table class="total-section">
-    
-        <tr class="total-row">
-            <td>SUBTOTAL</td>
-            <td class="amount">$ {{$movimiento->ValorSinImpuesto}}</td>
-        </tr>
-        <tr class="total-row">
-            <td>TASA DE IMPUESTO</td>
-            <td class="amount">0.000%</td>
-        </tr>
-        <tr class="total-row">
-            <td>IMPUESTO</td>
-            <td class="amount">$ {{$movimiento->ValorImpuesto}}</td>
-        </tr>
-        <tr class="total-row total">
-            <td>TOTAL</td>
-            <td class="amount">$ $ {{$movimiento->Total}}</td>
-        </tr>
-    </table>
+    <tr>
+        <th>TIPO</th>
+        <th>BASE/IMP</th>
+        <th>IMP</th>
+        <th>COMPRA</th>
+    </tr>
+    <tr class="total-row">
+        <td>19.00</td>
+        <td class="amount">$ {{number_format($movimiento->ValorSinImpuesto, 2, '.', ',')}}</td>
+        <td class="amount">$ {{number_format($movimiento->ValorImpuesto, 2, '.', ',')}}</td>
+        <td class="amount">$ {{number_format($movimiento->Total, 2, '.', ',')}}</td>
+    </tr>
+    <tr class="total-row total">
+        <td>TOTAL</td>
+        <td class="amount">$ {{number_format($movimiento->ValorSinImpuesto, 2, '.', ',')}}</td>
+        <td class="amount">$ {{number_format($movimiento->ValorImpuesto, 2, '.', ',')}}</td>
+        <td class="amount">$ {{number_format($movimiento->Total, 2, '.', ',')}}</td>
+    </tr>
+    <tr class="total-a-pagar">
+        <td colspan="3"><strong>TOTAL A PAGAR:</strong></td>
+        <td class="amount">$ {{number_format($movimiento->Total, 2, '.', ',')}}</td>
+    </tr>
+</table>
 
     
 </div>
@@ -159,4 +169,12 @@
         {{$movimiento->movimientosbasico->PiePagina ?? NULL}}</ul>
     </div>
 </body>
+@if($size === 'tirilla')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        window.print();
+    });
+</script>
+@endif
+
 </html>

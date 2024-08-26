@@ -38,7 +38,7 @@ class Movimientosdatallado extends Model
      *
      * @var array
      */
-    protected $fillable = ['Movimientos_id','Descuento','Producto_id','Cantidad_Ingreso','ValorUnitario','TotalValor','Impuesto_id','Cantidad_Egreso','Valor_Unitario','Obervacion','users_id'];
+    protected $fillable = ['Movimientos_id','Impuesto','Descuento','Producto_id','Cantidad_Ingreso','ValorUnitario','TotalValor','Impuesto_id','Cantidad_Egreso','Valor_Unitario','Obervacion','users_id'];
 
 
     /**

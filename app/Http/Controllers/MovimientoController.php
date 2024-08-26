@@ -29,27 +29,26 @@ class MovimientoController extends Controller
 
     public function generarPDF(Request $request, $id)
     {
-        // Determinar el tamaño de papel según la opción seleccionada
-        $size = $request->input('size', 'carta'); // 'carta' es el valor por defecto
+        $size = $request->input('size', 'carta');
+        $movimiento = Movimiento::with(['movimientosdatallados.productos'])->findOrFail($id);
+
+        if ($size === 'tirilla') {
+            return view('movimientos.facturas', compact('movimiento', 'size'));
+        }
 
         switch($size) {
             case 'oficio':
-                $paper = 'legal'; // Tamaño oficio (216mm x 356mm)
-                break;
-            case 'tirilla':
-                $paper = [0, 0, 226.772, 841.89]; // Tamaño tirilla (80mm x 297mm) en puntos
+                $paper = 'legal';
                 break;
             case 'media_carta':
-                $paper = [0, 0, 396, 612]; // Tamaño media carta (5.5" x 8.5")
+                $paper = [0, 0, 396, 612];
                 break;
             case 'carta':
             default:
-                $paper = 'letter'; // Tamaño carta (216mm x 279mm)
+                $paper = 'letter';
                 break;
         }
 
-        $movimiento = Movimiento::with(['movimientosdatallados.productos'])->findOrFail($id);
-        
         $pdf = PDF::loadView('movimientos.facturas', compact('movimiento', 'size'))
                   ->setPaper($paper, 'portrait');
 
@@ -71,16 +70,16 @@ class MovimientoController extends Controller
         public function pendientes($idCaja,$movimientos,$users){
             $movimiento=null;
             if ($movimientos ==1) {
-                $movimiento = Movimiento::where('estado','Pendiente')->where('Caja_id',$idCaja)->get();
+                $movimiento = Movimiento::with('usuariobasico')->where('estado','Pendiente')->where('Caja_id',$idCaja)->get();
             }if ($movimientos == 2) {
-                $movimiento = Movimiento::where('estado','Cierre')->where('Caja_id',$idCaja)->get();
+                $movimiento = Movimiento::with('usuariobasico')->where('estado','Cierre')->where('Caja_id',$idCaja)->get();
             }if ($movimientos == 3) {
-                $movimiento = Movimiento::where('estadoMovimientosCaja','EnEjecucion')->where('Caja_id',$idCaja)->where('users_id',$users)->get();
+                $movimiento = Movimiento::with('usuariobasico')->where('estadoMovimientosCaja','EnEjecucion')->where('Caja_id',$idCaja)->where('users_id',$users)->get();
             }if ($movimientos == 4) {
-                $movimiento = Movimiento::where('estadoMovimientosCaja','EnEjecucion')->where('Caja_id',$idCaja)->get();
+                $movimiento = Movimiento::with('usuariobasico')->where('estadoMovimientosCaja','EnEjecucion')->where('Caja_id',$idCaja)->get();
             }
            
-            // Guarda el movimiento y devuelve una respuesta JSON
+            // Devuelve los movimientos con los datos del cliente en formato JSON
             return response()->json($movimiento);
         }
     /**

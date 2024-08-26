@@ -167,8 +167,9 @@
                         <i class="fas fa-store"></i> Sistema de Ventas
                         <a class="fas fa-cash-register" href="#" id="Caja"> </a>
                         <a class="fas fa-wallet" href="#" id="OCaja"> </a>
-                        <input type="text" id='CajaInput' style='display:none'>
-                        <input type="text" id='CajaOnput' style='display:none'>
+                       
+                        <input type="text" value="{{$caja->CuentaDefectoIngreso ?? NULL}}" id='CajaInput' style='display:none'>
+                        <input type="text" value="{{$caja->CuentaDefectoSalida ?? NULL}}" id='CajaOnput' style='display:none'>
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -187,18 +188,18 @@
             <div class="row mt-3">
                 <div class="col-md-3">
                     <label for="buscarProveedor">Proveedor</label>
-                    <input type="text" id="Proveedor" class="form-control" style='display:none'>
+                    <input type="text" id="Proveedor"  value="{{$caja->ProveedorDefecto ?? NULL}}" class="form-control" style='display:none'>
                     <input type="text" id="buscarProveedor" class="form-control" placeholder="Buscar Proveedor..." readonly>
                 </div>
                 <div class="col-md-3">
                     <label for="buscarCliente">Usuario</label>
-                    <input type="text" id="Users" class="form-control" style='display:none'>
+                    <input type="text" id="Users" value="{{$caja->UsuarioDefecto ?? NULL}}" class="form-control" style='display:none'>
                     <input type="text" id="buscarCliente" class="form-control" placeholder="Buscar cliente..." readonly>    
                 </div>
                 <div class="col-md-3">
                     <label for="OrigenBodega_id">Bodega Origen</label>
                     <select class="form-select" id="OrigenBodega_id">
-                        <option value="">Seleccionar origen</option>
+                        <option value="{{$caja->OrigenBodegaDefecto ?? NULL}}" >{{$caja->bodegao->Descripcion ?? "Seleccionar origen"}}</option>
                         @foreach ($parametizarcajas as $parametizarcaja)
                             <option value="{{ $parametizarcaja->bodegad_id }}">{{ $parametizarcaja->bodega->Descripcion }}</option>
                         @endforeach
@@ -209,7 +210,7 @@
                     <label for="DestinoBodega_id">Bodega Destino</label>
                     <input type="text" id="BodegaDestino" class="form-control" style='display:none'>
                     <select class="form-select" id="DestinoBodega_id">
-                        <option value="">Seleccionar destino</option>
+                        <option value="{{$caja->DestinoBodegaDefecto ?? NULL}}">{{$caja->bodegad->Descripcion  ?? "Seleccionar origen"}}</option>
                         @foreach ($parametizarcajas as $parametizarcaja)
                             <option value="{{ $parametizarcaja->bodegad_id }}">{{ $parametizarcaja->bodega->Descripcion }}</option>
                         @endforeach
@@ -223,9 +224,7 @@
                 <div class="col-sm-8 mb-1">
                     <input type="text" id="buscarProducto" class="form-control" placeholder="Buscar producto por código o nombre...">
                 </div>
-                <div class=" col-sm-2 mb-1">
-                    <input type="text" id="CantidadEngreso" class="form-control" placeholder="Cantidad Engreso">
-                </div>
+               
                 <div class="col-sm-2 mb-1">
                     <input type="text" id="CantidadIngreso" class="form-control" placeholder="Cantidad Ingreso">
                 </div>
@@ -359,6 +358,7 @@
                                     <th>Fecha y Hora</th>
                                     <th>Cliente</th>
                                     <th>Total</th>
+                                    <th>Imprimir</th>
                                 </tr>
                             </thead>
                             <tbody id="movimientosTableBody">
@@ -499,8 +499,51 @@
     // Ajuste para los botones en dispositivos móviles
     table.buttons().container().appendTo('#ventasTable_wrapper .col-md-6:eq(0)');
 
-        
+    
+    window.impuestosActualizar = async function (event, id) {
+        var inputElement = event.target;
+            var impuesto = parseFloat(inputElement.value) || 0;
+            var row = $(inputElement).closest('tr');
+            
+            var cantidadIngreso = row.find('td:eq(2) input').val()|| 0;// Aseguramos que la cantidad mínima sea 1
+            if (cantidadIngreso <= 0) {
+                cantidadIngreso = 1;
+                inputElement.value = 0;
+            }
+            
+            var valorUnitario = parseFloat(row.find('td:eq(5) input').val()) || 0;
+            var descuento = parseFloat(row.find('td:eq(4) input').val()) || 0;
 
+            const cantidad = cantidadIngreso;
+            const totalSinDescuento = cantidad * valorUnitario;
+            const iva = 1 + (impuesto / 100);
+            const subtotal = totalSinDescuento / iva;  // Subtotal antes de aplicar el IVA
+            const impuestoTotal = totalSinDescuento - subtotal; // Impuesto calculado
+            const totalConDescuento = subtotal - descuento; // Subtotal menos el descuento
+            const totalFinal = totalConDescuento + impuestoTotal;
+
+            $.ajax({
+                url: `{{ route("movimientosdatallados.update", "") }}/${id}`,
+                method: 'PATCH',
+                data: {
+                    Cantidad_Ingreso: cantidadIngreso,
+                    TotalValor: totalFinal,
+                    Impuesto_id: impuestoTotal,
+                    Impuesto :impuesto,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function (response) {
+                    // Actualizar el total de la fila
+                    row.find('.total').text(totalFinal.toFixed(2));
+
+                    // Recalcular y actualizar totales
+                    actualizarTotales();
+                },
+                error: function (error) {
+                    console.error('Error al actualizar el movimiento:', error);
+                }
+            });
+        }
     
         window.updateCuentaI = async function (event, id) {
             var inputElement = event.target;
@@ -529,6 +572,7 @@
                     Cantidad_Ingreso: cantidadIngreso,
                     TotalValor: totalFinal,
                     Impuesto_id: impuestoTotal,
+                    Impuesto :impuesto,
                     _token: '{{ csrf_token() }}'
                 },
                 success: function (response) {
@@ -901,7 +945,7 @@
             });
         }
 
-        function CrearMovimiento(Movimientos_ids, Producto_ids, Cantidad_Ingresos,Descuento, Valor_Unitarios, TotalValors, Impuesto_ids, users_ids) {
+        function CrearMovimiento(Movimientos_ids, Producto_ids, Cantidad_Ingresos,Descuento, Valor_Unitarios, TotalValors, Impuesto_ids, users_ids,Impuesto) {
             
             return new Promise((resolve, reject) => {
                 const data = {
@@ -911,7 +955,8 @@
                     Valor_Unitario: Valor_Unitarios,
                     TotalValor: TotalValors,
                     Descuento:Descuento,
-                   
+                    Impuesto:Impuesto,
+
                     Impuesto_id: Impuesto_ids,
                     users_id: users_ids,
                 };
@@ -958,7 +1003,8 @@
                     producto.precio * cantidI ,
                     
                     Impuestos,
-                    {{ $users }}
+                    {{ $users }},Impuestos
+
         );
     agregarProductoATabla(nuevoMovimiento);
     } catch (error) {
@@ -1081,7 +1127,7 @@
         <tr>
             <td>${movimiento.id}</td>
             <td>${movimiento.created_at || 'N/A'}</td>
-            <td>$${(movimiento.total || 0).toFixed(2)}</td>
+            <td>$${(movimiento.Total || 0)}</td>
             <td>
                 <button class="btn btn-primary btn-sm editarMovimiento" data-id="${movimiento.id}">Editar</button>
             </td>
@@ -1113,6 +1159,11 @@
             }
         });
     }
+    window.imprimirs = async function ( id) {
+        var pdfUrl = '{{ route("movimientos.pdf", ":id") }}'.replace(':id', id) + '?size=carta';
+        window.open(pdfUrl, '_blank', 'width=800,height=600');
+    }
+
     function mostrarMovimientosPendientes(movimientos) {
         console.log(movimientos);
         
@@ -1122,9 +1173,10 @@
             htmlMovimientos += `
             <tr class="movimiento-row" data-movimiento-id="${movimiento.id}">
                 <td>${movimiento.id || 'N/A'}</td>
-                <td>${movimiento.created_at || 'N/A'}</td>
-                <td>${movimiento.UsuarioDestino_id || 'N/A'}</td>
-                <td>$${(movimiento.total || 0).toFixed(2)}</td>
+                <td>${movimiento.created_at ? new Date(movimiento.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A'}</td>
+                <td>${movimiento.usuariobasico.Apellido1  || 'N/A'}  ${movimiento.usuariobasico.Apeelido2  || 'N/A'} ${movimiento.usuariobasico.Nombre1  || 'N/A'} ${movimiento.usuariobasico.Nombre2  || 'N/A'}</td>
+                <td>$${(movimiento.Total || 0)}</td>
+                <td><button class="btn btn-sm btn-primary imprimir-movimiento" onclick=imprimirs(${movimiento.id})>Imprimir</button></td>
             </tr>
         `;
         });
@@ -1259,7 +1311,7 @@
         Producto_id: detalle.Producto_id,
         Descripcion: detalle.productos.Descripcion || 'N/A',
         Cantidad_Ingreso: `<input type="number" class="form-control cantidadI" onkeyup="updateCuentaI(event, ${detalle.id})" value="${detalle.Cantidad_Ingreso}" min="0">`,
-        Impuesto_id: `<input type="number" class="form-control cantidad" onkeyup="" value="${detalle.Impuesto_id}" min="0">`,
+        Impuesto_id: `<input type="number" class="form-control cantidad" onkeyup="impuestosActualizar(event, ${detalle.id})" value="${detalle.Impuesto_id}" min="0">`,
        
         Descuento: `<input type="number" class="form-control descuento" onkeyup="Descuentos(event, ${detalle.id})" value="${detalle.Descuento}" min="0">`,
         
@@ -1299,7 +1351,7 @@
                 impuestos =  $("#Impuesto_id").val() ;
             }
 
-            const nuevoMovimiento = await CrearMovimiento(Movimientos.id, producto.id, cantidI,Descuento ,producto.precio, producto.precio,  impuestos, {{ $users }});
+            const nuevoMovimiento = await CrearMovimiento(Movimientos.id, producto.id, cantidI,Descuento ,producto.precio, producto.precio,  impuestos, {{ $users }},impuestos);
         agregarProductoATabla(nuevoMovimiento);
     } catch (error) {
         console.error('Error al crear movimiento:', error);
@@ -1314,17 +1366,41 @@
     // Finalizar movimiento
     $('#finalizarMovimientoBtn').on('click', function () {
         if (Movimientos) {
-            var valorTotal = $('#grandTotal').val();
+            // Obtener los valores justo antes de usarlos
+            var Total = parseFloat($('#grandTotal').text().replace('$', '').replace(',', ''));
+            var Impuestos = parseFloat($('#grandImpuestos').text().replace('$', '').replace(',', ''));
+            var Proveedor = $('#Proveedor').val();
+            var Users = $('#Users').val();
+            var CajaInput = $('#CajaInput').val();
+            var CajaOnput = $('#CajaOnput').val();
+            var OrigenBodega_id = $('#OrigenBodega_id').val();
+            var DestinoBodega_id = $('#DestinoBodega_id').val();
+           
+            console.log('Valores obtenidos:', {
+                Total, Impuestos, Proveedor, Users, CajaInput, CajaOnput, OrigenBodega_id, DestinoBodega_id
+            });
+
             $.ajax({
                 url: `{{ route("movimientos.update", "") }}/${Movimientos.id}`,
                 method: 'PUT',
                 data: {
-                    estado: 'Finalizado',
-                    Total :valorTotal,
+                    estado: 'Pendiente',
+                    ValorImpuesto: Impuestos,
+                    ValorSinImpuesto: Total - Impuestos,
+                    OrigenBodega_id: OrigenBodega_id,
+                    DestinoBodega_id: DestinoBodega_id,
+                    UsuarioDestino_id: Users,
+                    OrigenProveedor_id: Proveedor,
+                    Cuenta_Salida: CajaOnput,
+                    Cuenta_Entrada: CajaInput,
+                    Total: Total,
                     _token: '{{ csrf_token() }}'
                 },
                 success: function (response) {
-                    alert('Movimiento finalizado con éxito');
+                    console.log(response);
+                    // Abrir una nueva ventana emergente con el PDF
+                    var pdfUrl = '{{ route("movimientos.pdf", ":id") }}'.replace(':id', response.id) + '?size=tirilla';
+                    window.open(pdfUrl, '_blank', 'width=800,height=600');
                     // Limpiar la interfaz o redirigir según sea necesario
                     limpiarInterfaz();
                 },
@@ -1377,8 +1453,8 @@
                         <p>Valor sin Impuesto: $${valorSinImpuesto.toFixed(2)}</p>
                         <p>Valor Impuesto: $${valorImpuesto.toFixed(2)}</p>
                         <select id="metodoPago" class="form-select mt-3">
-                            <option value="efectivo">Efectivo</option>
-                            <option value="tarjeta">Tarjeta</option>
+                            <option value="EFECTIVO">Efectivo</option>
+                            <option value="TARJETA">Tarjeta</option>
                         </select>
                     </div>
                     <div class="modal-footer">

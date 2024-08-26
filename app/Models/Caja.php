@@ -32,12 +32,34 @@ class Caja extends Model
      *
      * @var array
      */
-    protected $fillable = ['Descripcion','estado','numero','Empresas_id'];
+    protected $fillable = ['Descripcion', 'estado', 'numero', 'Empresas_id',
+        'CuentaDefectoIngreso', 'CuentaDefectoSalida', 'UsuarioDefecto', 'OrigenBodegaDefecto', 'DestinoBodegaDefecto'];
 
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
+
+     public function usuariobasico()
+     {
+         return $this->hasOne('App\Models\Usuariobasico', 'id', 'UsuarioDefecto');
+     }
+     public function cuentas()
+     {
+         return $this->hasOne('App\Models\Cuenta', 'id', 'CuentaDefectoSalida');
+     }
+     public function cuentai()
+     {
+         return $this->hasOne('App\Models\Cuenta', 'id', 'CuentaDefectoIngreso');
+     }
+     public function bodegao()
+     {
+         return $this->hasOne('App\Models\Bodega', 'id', 'OrigenBodegaDefecto');
+     }
+     public function bodegad()
+     {
+         return $this->hasOne('App\Models\Bodega', 'id', 'DestinoBodegaDefecto');
+     }
     public function movimientos()
     {
         return $this->hasMany('App\Models\Movimiento', 'Caja_id', 'id');
