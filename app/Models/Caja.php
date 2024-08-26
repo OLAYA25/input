@@ -32,7 +32,7 @@ class Caja extends Model
      *
      * @var array
      */
-    protected $fillable = ['Descripcion','estado','numero'];
+    protected $fillable = ['Descripcion','estado','numero','Empresas_id'];
 
 
     /**
@@ -42,7 +42,11 @@ class Caja extends Model
     {
         return $this->hasMany('App\Models\Movimiento', 'Caja_id', 'id');
     }
-    
+    public function empresas()
+    {
+        return $this->hasOne('App\Models\Empresa', 'id', 'Empresas_id');
+    }
+   
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */

@@ -18,8 +18,15 @@ $impuestosProductos = ImpuestosProducto::where('productos_id',$producto->id)->ge
 @endphp
 
 <!-- Precios Tab -->
-@if (Route::is('productos.edit'))                          
-   <div class="row">
+@if (Route::is('productos.edit'))      
+<div class="row">
+      
+        <div class="row">
+            <div class="col-12">
+                <h4 class="text-center">Parametrizar Precio de Compra</h4>
+                <hr>
+            </div>
+        </div>
         <form id="proveedorForm">
             <div class="box-body">
 
@@ -47,10 +54,11 @@ $impuestosProductos = ImpuestosProducto::where('productos_id',$producto->id)->ge
                 }
                 @endphp
                 <div class="form-group col-sm-12">
-                    <label for="Proveedor_id">Impuestos</label>
+                    <label for="Proveedor_id">Impuestos %</label>
                     <div class="input-group mar-btn ">
-                        <input disabled class="form-control" value ="{{$valortotal }}" placeholder="Impuestos"
-                            name="Proveedor_id" type="text" id="PorcentajeValor">
+                        <input  class="form-control" value ="{{$valortotal }}" placeholder="Impuestos"
+                            name="ImpuestoPorcentageTotal" type="text" id="PorcentajeValor">
+                            
                         <span class="input-group-btn">
                             <a href="#" data-toggle="modal" id="Buscar"
                                 data-target=".bd-impuestos-modal-lg" class="btn btn-success">Buscar </a>
@@ -63,25 +71,25 @@ $impuestosProductos = ImpuestosProducto::where('productos_id',$producto->id)->ge
                         type="checkbox" id="Principal">
                 </div>
                 <div class="form-group col-sm-2">
-                    <label for="ValorBase">Valor Base</label>
+                    <label for="ValorBase">Costo Base</label>
                     <input class="form-control" onchange="base(event)" value ="{{$precioActual->ValorBase ?? NULL}}" placeholder="Base"
                         name="ValorBase" type="number" id="ValorBase">
                 </div>
                 <div class="form-group col-sm-2">
                     <label for="ValorBase">Valor Impuesto</label>
-                    <input class="form-control" onchange="ImpuestoValor(event)" value="{{ $valortotal != 0 && isset($precioActual) ? number_format(($precioActual->ValorBase /100) *  $valortotal, 2) : 0 }}" placeholder="Base"
+                    <input class="form-control" onchange="ImpuestoValor(event)" value="{{ $precioActual->Impuesto_id ??Null }}" placeholder="Base"
                         name="Impuesto_id" type="number" id="ImpuestoValor">
                 </div>
                 
                 <div class="form-group col-sm-2">
-                    <label for="ValorPublico">ValorPublico</label>
+                    <label for="ValorPublico">Subtotal </label>
                     <input class="form-control" onchange="publico(event)" placeholder="Publico"  value ="{{$precioActual->ValorPublico ?? NULL}}" 
                         name="ValorPublico" type="number" id="ValorPublico">
                 </div>
 
                 <div class="form-group col-sm-2">
-                    <label for="ValorBase">Publico+Impuesto</label>
-                    <input class="form-control" onchange="ImpuestoPublico(event)" value="{{ isset($precioActual) ? (floatval($precioActual->ValorPublico) + ($valortotal != 0 ? floatval(number_format(($precioActual->ValorBase /100) * $valortotal, 2)) : 0)) : 0 }}" placeholder="Base"
+                    <label for="ValorBase">Subtotal+Impuesto</label>
+                    <input class="form-control" onchange="ImpuestoPublico(event)" value="{{$precioActual->ImpuestoPublico ??Null}}" placeholder="Base"
                         name="ImpuestoPublico" type="number" id="ValorPublicoConImpuestos">
                 </div>
 
@@ -130,7 +138,7 @@ $impuestosProductos = ImpuestosProducto::where('productos_id',$producto->id)->ge
                     <button type="button" id="ActulizarPrecio" class="btn btn-info">Agregar</button>
                 </div>
         </form>
-          
+        
     </div>
 <br>
 <div class="panel-body">
@@ -177,68 +185,97 @@ var Impuestos = document.getElementById("ImpuestoValor");
 var impuestoPorcentaje = document.getElementById("PorcentajeValor");
 var valorPublicoConImpuestos = document.getElementById("ValorPublicoConImpuestos");
 
-bs.addEventListener('input', actualizarTodo);
-valorPublico.addEventListener('input', actualizarTodo);
-ut.addEventListener('input', actualizarDesdeUtilidad);
-utp.addEventListener('input', actualizarDesdeUtilidadPorcentaje);
-Impuestos.addEventListener('input', actualizarTodo);
-impuestoPorcentaje.addEventListener('input', actualizarTodo);
+bs.addEventListener('input', base);
+valorPublico.addEventListener('input', publico);
+ut.addEventListener('input', utilidad);
+utp.addEventListener('input', utilidadpro);
+Impuestos.addEventListener('input', ImpuestoValor);
+impuestoPorcentaje.addEventListener('input', base);
+valorPublicoConImpuestos.addEventListener('input', ImpuestoConValor);
 
-function actualizarTodo() {
+function base(event) {
+    const total = parseFloat(ValorPublicoConImpuestos.value) || 0;
+    const porcentajeImpuesto = parseFloat(impuestoPorcentaje.value) || 0;
+    const valorPorcentajeDivido =  (1+(porcentajeImpuesto)/100);
+    const subtotal = (total  / valorPorcentajeDivido).toFixed(2);
+    const valorImpuesto = total-subtotal ;
+    valorPublico.value  =subtotal;
+    Impuestos.value=valorImpuesto.toFixed(2);
+
+    
+    
     actualizarUtilidad();
-    actualizarUtilidadPorcentaje();
-    actualizarValorPublico();
-    actualizarValorPublicoConImpuestos();
 }
 
-function actualizarImpuesto() {
-    var porcentaje = parseFloat(impuestoPorcentaje.value) || 0;
-    var valorBase = parseFloat(bs.value) || 0;
-    var valorUtilidad = parseFloat(ut.value) || 0;
-    var valorSinImpuesto = valorBase + valorUtilidad;
+function ImpuestoValor(event) {
+    const valorImpuesto = parseFloat(event.target.value) || 0;
+    const valorPublicoActual = parseFloat(valorPublico.value) || 0;
+    const total = valorPublicoActual + valorImpuesto;
+    valorPublicoConImpuestos.value = total.toFixed(2);
+}
+
+function publico(event) {
+    const valorPublicoActual = parseFloat(event.target.value) || 0;
+    const valorImpuesto = parseFloat(Impuestos.value) || 0;
+    const total = valorPublicoActual + valorImpuesto;
+    valorPublicoConImpuestos.value = total.toFixed(2);
     
-    var valorImpuesto = (valorSinImpuesto * porcentaje / 100).toFixed(2);
-    Impuestos.value = valorImpuesto;
+    actualizarUtilidad();
+}
+
+function ImpuestoConValor(event) {
+    const total = parseFloat(event.target.value) || 0;
+    const porcentajeImpuesto = parseFloat(impuestoPorcentaje.value) || 0;
+    const porcimpuestos = (1+(porcentajeImpuesto)/100);
+    const subtotal =((total / porcimpuestos )).toFixed(2);
+    valorPublico.value  = subtotal
+    
+    const impuesto = total - subtotal;
+    Impuestos.value = impuesto.toFixed(2);
+    
+    actualizarUtilidad();
+}
+
+function utilidad(event) {
+    const utilidadValor = parseFloat(event.target.value) || 0;
+    const valorBase = parseFloat(bs.value) || 0;
+    const valorPublicoNuevo = valorBase + utilidadValor;
+    valorPublico.value = valorPublicoNuevo.toFixed(2);
+    
+    const valorImpuesto = parseFloat(Impuestos.value) || 0;
+    const total = valorPublicoNuevo + valorImpuesto;
+    valorPublicoConImpuestos.value = total.toFixed(2);
+    
+    actualizarUtilidadPorcentaje();
+}
+
+function utilidadpro(event) {
+    const utilidadPorc = parseFloat(event.target.value) || 0;
+    const valorBase = parseFloat(bs.value) || 0;
+    const utilidadValor = (valorBase * utilidadPorc) / 100;
+    ut.value = utilidadValor.toFixed(2);
+    
+    const valorPublicoNuevo = valorBase + utilidadValor;
+    valorPublico.value = valorPublicoNuevo.toFixed(2);
+    
+    const valorImpuesto = parseFloat(Impuestos.value) || 0;
+    const total = valorPublicoNuevo + valorImpuesto;
+    valorPublicoConImpuestos.value = total.toFixed(2);
 }
 
 function actualizarUtilidad() {
-    var valorBase = parseFloat(bs.value) || 0;
-    var porcentajeUtilidad = parseFloat(utp.value) || 0;
-    ut.value = (valorBase * porcentajeUtilidad / 100).toFixed(2);
+    const valorBase = parseFloat(bs.value) || 0;
+    const valorPublicoActual = parseFloat(valorPublico.value) || 0;
+    const utilidadValor = valorPublicoActual - valorBase;
+    ut.value = utilidadValor.toFixed(2);
+    actualizarUtilidadPorcentaje();
 }
 
 function actualizarUtilidadPorcentaje() {
-    var valorBase = parseFloat(bs.value) || 0;
-    var valorUtilidad = parseFloat(ut.value) || 0;
-    utp.value = valorBase !== 0 ? ((valorUtilidad / valorBase) * 100).toFixed(2) : "0.00";
-}
-
-function actualizarValorPublico() {
-    var valorBase = parseFloat(bs.value) || 0;
-    var valorUtilidad = parseFloat(ut.value) || 0;
-    var valorSinImpuesto = (valorBase + valorUtilidad).toFixed(2);
-    actualizarImpuesto();
-    valorPublico.value = valorSinImpuesto;
-}
-
-function actualizarValorPublicoConImpuestos() {
-    var valorBase = parseFloat(bs.value) || 0;
-    var valorUtilidad = parseFloat(ut.value) || 0;
-    var impuesto = parseFloat(Impuestos.value) || 0;
-    var valorTotal = (valorBase + valorUtilidad + impuesto).toFixed(2);
-    valorPublicoConImpuestos.value = valorTotal;
-}
-
-function actualizarDesdeUtilidad() {
-    actualizarUtilidadPorcentaje();
-    actualizarValorPublico();
-    actualizarValorPublicoConImpuestos();
-}
-
-function actualizarDesdeUtilidadPorcentaje() {
-    actualizarUtilidad();
-    actualizarValorPublico();
-    actualizarValorPublicoConImpuestos();
+    const valorBase = parseFloat(bs.value) || 0;
+    const utilidadValor = parseFloat(ut.value) || 0;
+    const utilidadPorcentaje = (utilidadValor / valorBase) * 100;
+    utp.value = utilidadPorcentaje.toFixed(2);
 }
 
 

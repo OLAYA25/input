@@ -45,10 +45,17 @@ class EmpresaController extends Controller
     {
         request()->validate(Empresa::$rules);
 
-        $empresa = Empresa::create($request->all());
+        $empresa = new Empresa($request->except('Logo'));
+
+        if ($request->hasFile('Logo')) {
+            $logoPath = $request->file('Logo')->store('logos', 'public');
+            $empresa->Logo = $logoPath;
+        }
+
+        $empresa->save();
 
         return redirect()->route('empresas.index')
-            ->with('success', 'Empresa created successfully.');
+            ->with('success', 'Empresa creada exitosamente.');
     }
 
     /**
@@ -88,10 +95,22 @@ class EmpresaController extends Controller
     {
         request()->validate(Empresa::$rules);
 
-        $empresa->update($request->all());
+        $empresa->fill($request->except('Logo'));
+
+        if ($request->hasFile('Logo')) {
+            // Eliminar el logo anterior si existe
+            if ($empresa->Logo) {
+                Storage::disk('public')->delete($empresa->Logo);
+            }
+            
+            $logoPath = $request->file('Logo')->store('logos', 'public');
+            $empresa->Logo = $logoPath;
+        }
+
+        $empresa->save();
 
         return redirect()->route('empresas.index')
-            ->with('success', 'Empresa updated successfully');
+            ->with('success', 'Empresa actualizada exitosamente');
     }
 
     /**

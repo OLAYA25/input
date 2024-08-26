@@ -66,6 +66,11 @@ class Empresa extends Model
     {
         return $this->hasMany('App\Models\Movimiento', 'empresa_id', 'id');
     }
+
+    public function caja()
+    {
+        return $this->hasOne('App\Models\Caja', 'Empresas_id', 'id');
+    }
     
 
 }

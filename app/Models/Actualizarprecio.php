@@ -42,7 +42,7 @@ class Actualizarprecio extends Model
      *
      * @var array
      */
-    protected $fillable = ['Producto_id','Impuesto_id','ImpuestoPublico','Principal','ValorBase','Proveedor_id','ValorPublico','Descuento1','Cantidad1','Descuento2','Cantidad2','Descuento3','Cantidad3','Utilidad','UtilidadPorc'];
+    protected $fillable = ['Producto_id','Impuesto_id','ValorPublicoConImpuestos','ImpuestoPublico','ImpuestoPorcentageTotal','Principal','ValorBase','Proveedor_id','ValorPublico','Descuento1','Cantidad1','Descuento2','Cantidad2','Descuento3','Cantidad3','Utilidad','UtilidadPorc'];
 
 
     /**

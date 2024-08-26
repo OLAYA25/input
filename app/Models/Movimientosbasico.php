@@ -35,7 +35,7 @@ class Movimientosbasico extends Model
      *
      * @var array
      */
-    protected $fillable = ['Codigo','Descripcion','Descuento','Agregar','Alerta','CodigoPredetermidao','OrigenBodega','DestinoBodega','UsuarioOrigen','UsuarioDestino'];
+    protected $fillable = ['Codigo','Descripcion','Descuento','Agregar','Alerta','CodigoPredetermidao','OrigenBodega','DestinoBodega','UsuarioOrigen','UsuarioDestino','TituloPiePagina','PiePagina'];
 
     public function codigos()
     {
@@ -50,6 +50,11 @@ class Movimientosbasico extends Model
     {
         return $this->hasMany('App\Models\Movimientosbodega', 'CodigosMovimientos', 'id');
     }
-    
+    public function movimientos()
+    {
+        return $this->hasMany('App\Models\Movimiento', 'TipoMovimiento_id', 'id');
+    }
+
+
 
 }

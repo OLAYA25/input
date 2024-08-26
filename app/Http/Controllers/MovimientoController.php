@@ -6,7 +6,7 @@ use App\Models\Movimiento;
 use App\Models\Movimientosdatallado;
 use App\Models\Bodegasproducto;
 use Illuminate\Http\Request;
-
+use Barryvdh\DomPDF\Facade\Pdf;
 /**
  * Class MovimientoController
  * @package App\Http\Controllers
@@ -18,6 +18,7 @@ class MovimientoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+   
     public function index()
     {
         $movimientos = Movimiento::paginate();
@@ -26,6 +27,37 @@ class MovimientoController extends Controller
             ->with('i', (request()->input('page', 1) - 1) * $movimientos->perPage());
     }
 
+    public function generarPDF(Request $request, $id)
+    {
+        // Determinar el tamaño de papel según la opción seleccionada
+        $size = $request->input('size', 'carta'); // 'carta' es el valor por defecto
+
+        switch($size) {
+            case 'oficio':
+                $paper = 'legal'; // Tamaño oficio (216mm x 356mm)
+                break;
+            case 'tirilla':
+                $paper = [0, 0, 226.772, 841.89]; // Tamaño tirilla (80mm x 297mm) en puntos
+                break;
+            case 'media_carta':
+                $paper = [0, 0, 396, 612]; // Tamaño media carta (5.5" x 8.5")
+                break;
+            case 'carta':
+            default:
+                $paper = 'letter'; // Tamaño carta (216mm x 279mm)
+                break;
+        }
+
+        $movimiento = Movimiento::with(['movimientosdatallados.productos'])->findOrFail($id);
+        
+        $pdf = PDF::loadView('movimientos.facturas', compact('movimiento', 'size'))
+                  ->setPaper($paper, 'portrait');
+
+        return $pdf->stream('movimiento_' . $id . '.pdf');
+    }
+
+    
+    
     public function CrearMovimientosDetalle(Request $request)
         {
          
@@ -98,6 +130,7 @@ class MovimientoController extends Controller
 
         return view('movimiento.show', compact('movimiento'));
     }
+
     public function obtener($id)
     {
         $movimiento = Movimiento::with(['movimientosdatallados.productos'])->findOrFail($id);
@@ -127,22 +160,8 @@ class MovimientoController extends Controller
 {
     $request->validate(Movimiento::$rules);
     
-    if ($request->estado === 'Finalizado') {
-        $detalles = Movimientosdatallado::where('Movimientos_id',  $movimiento->id)->get();
-
-        foreach ($detalles as $detalle) {
-            $totalMovimiento = $detalle->Cantidad_Ingreso - $detalle->Cantidad_Egreso;
-
-            // Actualizar Origen Bodega
-            $this->updateBodegaProducto($detalle, $movimiento->OrigenBodega_id, $totalMovimiento);
-
-            // Actualizar Destino Bodega
-            $this->updateBodegaProducto($detalle, $movimiento->DestinoBodega_id, $totalMovimiento);
-        }
-    } else {
-        $movimiento->update($request->all());
-    }
-
+  
+    $movimiento->update($request->all());
     return response()->json($movimiento);
 }
 

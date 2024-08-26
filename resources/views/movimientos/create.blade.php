@@ -237,8 +237,9 @@
                         <tr>
                             <th>Código</th>
                             <th>Descripción</th>
-                            <th>Cantidad E</th>
-                            <th>Cantidad I</th>
+                            
+                            <th>Cantidad </th>
+                            <th>Impuestos %</th>
                             <th>Descuento</th>
                             <th>Precio</th>
                             <th>Total</th>
@@ -264,7 +265,7 @@
                     <i class="fas fa-box"></i> Unidades: <span id="unitCount">0</span>
                 </div>
                 <div class="col-md-3">
-                    <i class="fas fa-star"></i> Puntos: <span id="pointCount">0</span>
+                    <i class="fas fa-star"></i> Impuestos : <span id="grandImpuestos">$0.00</span>
                 </div>
                 <div class="col-md-3">
                     <i class="fas fa-weight"></i> Peso / Kg: <span id="weightCount">0</span>
@@ -420,7 +421,7 @@
 <!-- Custom Script -->
 <script src="{{ asset('../resources/js/datatableCreat.js') }}"></script>
 
-    <script>
+<script>
     $(document).ready(function () {// Inicializa DataTable
         $(document).on('keydown', function(event) {
         // Verificar si se presiona Control y X al mismo tiempo
@@ -466,9 +467,9 @@
         // Hace la tabla responsiva
         columns: [
             { data: 'Producto_id' },
-            { data: 'Descripcion' },
-            { data: 'Cantidad_Egreso' },
+            { data: 'Descripcion' }, 
             { data: 'Cantidad_Ingreso' },
+            { data: 'Impuesto_id' },
             { data: 'Descuento' },
             { data: 'Valor_Unitario' },
             { data: 'TotalValor' },
@@ -498,26 +499,41 @@
     // Ajuste para los botones en dispositivos móviles
     table.buttons().container().appendTo('#ventasTable_wrapper .col-md-6:eq(0)');
 
-
+        
 
     
         window.updateCuentaI = async function (event, id) {
             var inputElement = event.target;
-            var cantidadIngreso = parseFloat(inputElement.value) || 0;
+            var cantidadIngreso = parseFloat(inputElement.value) || 1; // Aseguramos que la cantidad mínima sea 1
+            if (cantidadIngreso <= 0) {
+                cantidadIngreso = 1;
+                inputElement.value = 1;
+            }
             var row = $(inputElement).closest('tr');
-            var precioUnitario = parseFloat(row.find('td:eq(5) input').val()) || 0;
+            var valorUnitario = parseFloat(row.find('td:eq(5) input').val()) || 0;
+            var impuesto = parseFloat(row.find('td:eq(3) input').val()) || 0;
+            var descuento = parseFloat(row.find('td:eq(4) input').val()) || 0;
+
+            const cantidad = cantidadIngreso;
+            const totalSinDescuento = cantidad * valorUnitario;
+            const iva = 1 + (impuesto / 100);
+            const subtotal = totalSinDescuento / iva;  // Subtotal antes de aplicar el IVA
+            const impuestoTotal = totalSinDescuento - subtotal; // Impuesto calculado
+            const totalConDescuento = subtotal - descuento; // Subtotal menos el descuento
+            const totalFinal = totalConDescuento + impuestoTotal;
 
             $.ajax({
                 url: `{{ route("movimientosdatallados.update", "") }}/${id}`,
                 method: 'PATCH',
                 data: {
                     Cantidad_Ingreso: cantidadIngreso,
+                    TotalValor: totalFinal,
+                    Impuesto_id: impuestoTotal,
                     _token: '{{ csrf_token() }}'
                 },
                 success: function (response) {
                     // Actualizar el total de la fila
-                    var nuevoTotal = cantidadIngreso * precioUnitario;
-                    row.find('.total').text(nuevoTotal.toFixed(2));
+                    row.find('.total').text(totalFinal.toFixed(2));
 
                     // Recalcular y actualizar totales
                     actualizarTotales();
@@ -528,23 +544,34 @@
             });
         }
 
-        window.updateCuentaE = async function (event, id) {
+        window.precio = async function (event, id) {
             var inputElement = event.target;
-            var cantidadEgreso = parseFloat(inputElement.value) || 0;
+            var valorUnitario = parseFloat(inputElement.value) || 0;
             var row = $(inputElement).closest('tr');
-            var precioUnitario = parseFloat(row.find('td:eq(5) input').val()) || 0;
+            var cantidadIngreso = parseFloat(row.find('td:eq(2) input').val()) || 0;
+            var impuesto = parseFloat(row.find('td:eq(3) input').val()) || 0;
+            var descuento = parseFloat(row.find('td:eq(4) input').val()) || 0;
+
+            const cantidad = cantidadIngreso;
+            const totalSinDescuento = cantidad * valorUnitario;
+            const iva = 1 + (impuesto / 100);
+            const subtotal = totalSinDescuento / iva;  // Subtotal antes de aplicar el IVA
+            const impuestoTotal = totalSinDescuento - subtotal; // Impuesto calculado
+            const totalConDescuento = subtotal - descuento; // Subtotal menos el descuento
+            const totalFinal = totalConDescuento + impuestoTotal;
 
             $.ajax({
                 url: `{{ route("movimientosdatallados.update", "") }}/${id}`,
                 method: 'PATCH',
                 data: {
-                    Cantidad_Egreso: cantidadEgreso,
+                    Valor_Unitario: valorUnitario,
+                    TotalValor: totalFinal,
+                    Impuesto_id: impuestoTotal,
                     _token: '{{ csrf_token() }}'
                 },
                 success: function (response) {
                     // Actualizar el total de la fila
-                    var nuevoTotal = cantidadEgreso * precioUnitario;
-                    row.find('.total').text(nuevoTotal.toFixed(2));
+                    row.find('.total').text(totalFinal.toFixed(2));
 
                     // Recalcular y actualizar totales
                     actualizarTotales();
@@ -555,15 +582,7 @@
             });
         }
 
-        function actualizarTotales() {
-            var total = 0;
-            $('#ventasTable tbody tr').each(function() {
-                var valorTotal = parseFloat($(this).find('.total').text()) || 0;
-                total += valorTotal;
-            });
-            $('#totalGeneral').text(total.toFixed(2));
-        }
-
+    
         window.Observacion = async function (event, id) {
             var inputElement = event.target;
             var cantidadEgreso = inputElement.value;
@@ -618,10 +637,31 @@
             
             var precioConDescuento = precioUnitario - descuento;
             var nuevoTotal = precioConDescuento * cantidad;
+                console.log(descuento);
+           
             
-            row.find('.total').text(nuevoTotal.toFixed(2));
+
+               $.ajax({
+                url: `{{ route("movimientosdatallados.update", "") }}/${id}`,
+                method: 'PATCH',
+                data: {
+                    Descuento: descuento,
+                    TotalValor:nuevoTotal,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function (response) {
+                    // Actualizar el total de la fila
+                    row.find('.total').text(nuevoTotal.toFixed(2));
+
+                    console.log(response);
+                    // Recalcular y actualizar totales
+                    actualizarTotales();
+                },
+                error: function (error) {
+                    console.error('Error al actualizar el movimiento:', error);
+                }
+            });
             
-            actualizarTotales();
         }
        
 
@@ -771,6 +811,8 @@
                                 value: item.producto.Descripcion,
                                 id: item.producto.id,
                                 codigo: item.Codigo,
+                                impuesto:item.producto.actualizarprecios && item.producto.actualizarprecios[0] ? item.producto.actualizarprecios[0].ImpuestoPorcentageTotal : 0,
+                                
                                 precio: item.producto.actualizarprecios && item.producto.actualizarprecios[0] ? item.producto.actualizarprecios[0].ImpuestoPublico : 0
                             };
                         }));
@@ -807,7 +849,7 @@
                 }
             }
         });
-        $('#CantidadEngreso').on('keypress', function (event) {
+        $('#Impuesto_id').on('keypress', function (event) {
             if (event.keyCode === 13) {
                 const autocompleteInstance = $(this).autocomplete('instance');
                 const firstItem = autocompleteInstance.menu.element.find('li:first').data('ui-autocomplete-item');
@@ -859,7 +901,7 @@
             });
         }
 
-        function CrearMovimiento(Movimientos_ids, Producto_ids, Cantidad_Ingresos,Descuento, Valor_Unitarios, TotalValors, Impuesto_ids, Cantidad_Egresos, users_ids) {
+        function CrearMovimiento(Movimientos_ids, Producto_ids, Cantidad_Ingresos,Descuento, Valor_Unitarios, TotalValors, Impuesto_ids, users_ids) {
             
             return new Promise((resolve, reject) => {
                 const data = {
@@ -869,8 +911,8 @@
                     Valor_Unitario: Valor_Unitarios,
                     TotalValor: TotalValors,
                     Descuento:Descuento,
+                   
                     Impuesto_id: Impuesto_ids,
-                    Cantidad_Egreso: Cantidad_Egresos,
                     users_id: users_ids,
                 };
 
@@ -904,7 +946,7 @@
 
             try {
                 var cantidI = $("#CantidadIngreso").val() || "1";
-                var cantidE = $("#CantidadEngreso").val() || "1";
+                var Impuestos = producto.Impuesto_id ||  $("#Impuesto_id").val() || "0";
 
                 // Usamos el ID del movimiento existente
                 const nuevoMovimiento = await CrearMovimiento(
@@ -913,9 +955,9 @@
                     cantidI,
                     Descuento,
                     producto.precio,
-                    producto.precio * cantidI ||  producto.precio * cantidE ,
-                    '',
-                    cantidE,
+                    producto.precio * cantidI ,
+                    
+                    Impuestos,
                     {{ $users }}
         );
     agregarProductoATabla(nuevoMovimiento);
@@ -928,16 +970,8 @@
     }
 
     // Eventos de tabla de productos
-    $(document).on('input', '.cantidad', function () {
-        const row = $(this).closest('tr');
-        const cantidad = $(this).val();
-        const precio = parseFloat(row.find('td:eq(3)').text());
-        const total = cantidad * precio;
-        row.find('.total').text(total.toFixed(2));
-
-        actualizarTotales();
-
-    });
+    // Esta función se ejecuta cuando se modifica el valor de un campo con la clase 'cantidad'
+    
 
 
     $(document).on('click', '.eliminar', function () {
@@ -948,55 +982,51 @@
         .draw();
     actualizarTotales();
     
-});
+    });
 
-window.actualizarTotales = async function () {
-    let totalUnidades = 0, totalFilas = 0, totalGeneral = 0;
+ function actualizarTotales () {
+    let totalUnidades = 0, totalFilas = 0, totalGeneral = 0, totalImpuestos = 0;
     
     // Obtener las filas como nodos DOM
     var rows = $('#ventasTable').DataTable().rows().nodes();
     
     $(rows).each(function (index, row) {
         const cantidadIngreso = parseFloat($(row).find('td:eq(2) input').val()) || 0;
-        const cantidadEgreso = parseFloat($(row).find('td:eq(3) input').val()) || 0;
+        const impuesto = parseFloat($(row).find('td:eq(3) input').val()) || 0;
         const valorUnitario = parseFloat($(row).find('td:eq(5) input').val()) || 0;
-        
-        const total = (cantidadIngreso + cantidadEgreso) * valorUnitario;
-        
-        console.log("Fila", index + 1, " - Cantidad Ingreso:", cantidadIngreso, " - Cantidad Egreso:", cantidadEgreso, " - Valor Unitario:", valorUnitario, " - Total:", total);
-        
-        totalUnidades += cantidadIngreso + cantidadEgreso;
-        totalGeneral += total;
+        const descuento = parseFloat($(row).find('td:eq(4) input').val()) || 0;
+
+        const cantidad = cantidadIngreso;
+        const totalSinDescuento = cantidad * valorUnitario;
+        const iva = 1 + (impuesto / 100);
+        const subtotal = totalSinDescuento / iva;  // Subtotal antes de aplicar el IVA
+        const impuestoTotal = totalSinDescuento - subtotal; // Impuesto calculado
+        const totalConDescuento = subtotal - descuento; // Subtotal menos el descuento
+        const totalFinal = totalConDescuento + impuestoTotal; // Total final después del descuento e IVA
+
+        // Acumular totales generales
+        totalUnidades += cantidad;
+        totalImpuestos += impuestoTotal;
+        totalGeneral += totalFinal;
         totalFilas++;
-        
-        // Actualizar el total en la fila
-        $(row).find('.total').text(total.toFixed(2));
+
+        // Actualizar el total en la fila sin cambiar el foco
+        $(row).find('.total').text(totalFinal.toFixed(2));
+
     });
-
-    console.log("Total Unidades:", totalUnidades);
-    console.log("Total General:", totalGeneral);
-
-    // Actualizar los totales en el DOM
+    
+    // Actualizar los totales en el DOM sin cambiar el foco
     $('#rowCount').text(totalFilas);
     $('#unitCount').text(totalUnidades);
     $('#grandTotal').text('$' + totalGeneral.toFixed(2));
+    $('#grandImpuestos').text('$' + totalImpuestos.toFixed(2));
     
-    // Forzar actualización de la tabla
-    $('#ventasTable').DataTable().draw(false);
+    // Actualizar la tabla sin redibujarla completamente
+    $('#ventasTable').DataTable().columns.adjust();
 }
 
-// Llamar a actualizarTotales después de cualquier cambio en la tabla
-$(document).on('input', '#ventasTable input', function() {
-    actualizarTotales();
-});
 
-// Llamar a actualizarTotales después de agregar o eliminar filas
-$('#ventasTable').on('draw.dt', function() {
-    actualizarTotales();
-});
-
-
-
+ 
 
     // Buscar movimientos pendientes
     $('#buscarPendientesBtn').on('click', buscarMovimientosPendientes);
@@ -1013,10 +1043,8 @@ $('#ventasTable').on('draw.dt', function() {
             console.error('Error al buscar movimientos pendientes:', error);
         }
     });
-}
-
-
-    function mostrarMovimientosPendientes(movimientos) {
+    }
+        function mostrarMovimientosPendientes(movimientos) {
         let html = '';
         console.log(movimientos);
         
@@ -1230,11 +1258,12 @@ $('#ventasTable').on('draw.dt', function() {
         const newRow = {
         Producto_id: detalle.Producto_id,
         Descripcion: detalle.productos.Descripcion || 'N/A',
-        Cantidad_Egreso: `<input type="number" class="form-control cantidad" onkeyup="updateCuentaE(event, ${detalle.id})" value="${detalle.Cantidad_Egreso}" min="0">`,
         Cantidad_Ingreso: `<input type="number" class="form-control cantidadI" onkeyup="updateCuentaI(event, ${detalle.id})" value="${detalle.Cantidad_Ingreso}" min="0">`,
-        Descuento: `<input type="number" class="form-control descuento" onkeyup="Descuentos(event, ${detalle.Descuento})" value="${detalle.Descuento}" min="0">`,
+        Impuesto_id: `<input type="number" class="form-control cantidad" onkeyup="" value="${detalle.Impuesto_id}" min="0">`,
+       
+        Descuento: `<input type="number" class="form-control descuento" onkeyup="Descuentos(event, ${detalle.id})" value="${detalle.Descuento}" min="0">`,
         
-        Valor_Unitario: `<input type="number" class="form-control  " onkeyup="updateCuentaE(event, ${detalle.Descuento})" value="${detalle.Valor_Unitario}" min="0">`,
+        Valor_Unitario: `<input type="number" class="form-control  " onkeyup="precio(event, ${detalle.id})" value="${detalle.Valor_Unitario}" min="0">`,
         TotalValor:`  <div class="total" >${detalle.TotalValor}</div>`,
         Observacion: `<input type="text" class="form-control" onchange="Observacion(event, ${detalle.id})" value="${detalle.Observacion || ''}" min="0">`,
         Acciones: `<button onclick="EliminarDetalle(${detalle.id})" class="btn btn-danger  btn-sm eliminar"><i class="fas fa-trash"></i></button>`
@@ -1258,18 +1287,19 @@ $('#ventasTable').on('draw.dt', function() {
 
         try {
             var cantidI = $("#CantidadIngreso").val();
-            var cantidE = $("#CantidadEngreso").val();
-            var  cantidI = $("#CantidadIngreso").val();
+            
+           
             var Descuento= $("#Descuento").val();
             if (cantidI == null || cantidI == "") {
                 cantidI = 1;
             }
-            var cantidE = $("#CantidadEngreso").val();
-            if (cantidE == null || cantidE == "") {
-                cantidE = 1;
+            console.log("agregando productos "  + producto.impuesto);
+            var impuestos =  producto.impuesto;
+            if (impuestos == null || impuestos == "") {
+                impuestos =  $("#Impuesto_id").val() ;
             }
 
-            const nuevoMovimiento = await CrearMovimiento(Movimientos.id, producto.id, cantidI,Descuento ,producto.precio, producto.precio, '', cantidE, {{ $users }});
+            const nuevoMovimiento = await CrearMovimiento(Movimientos.id, producto.id, cantidI,Descuento ,producto.precio, producto.precio,  impuestos, {{ $users }});
         agregarProductoATabla(nuevoMovimiento);
     } catch (error) {
         console.error('Error al crear movimiento:', error);
@@ -1312,14 +1342,20 @@ $('#ventasTable').on('draw.dt', function() {
 
     function abrirModalCobro() {
         let totalGeneral = parseFloat($('#grandTotal').text().replace('$', '').replace(',', '').trim());
-
+        let totalImpuestos = parseFloat($('#grandImpuestos').text().replace('$', '').replace(',', '').trim());
+        var usuario = document.getElementById('Users').value;
+        var proveedor = document.getElementById('Proveedor').value;
+        var bodegaOrigen = document.getElementById('OrigenBodega_id').value;
+        var bodegaDestino = document.getElementById('BodegaDestino').value;
+        var carteraOrigen = document.getElementById('CajaInput').value;
+        var carteraDestino = document.getElementById('CajaOnput').value;
         if (isNaN(totalGeneral)) {
             console.error('El total no es un número válido:', $('#grandTotal').text());
             totalGeneral = 0;
         }
 
-        let valorSinImpuesto = totalGeneral / 1.19; // Asumiendo un IVA del 19%
-        let valorImpuesto = totalGeneral - valorSinImpuesto;
+        let valorSinImpuesto = totalGeneral - totalImpuestos; // Asumiendo un IVA del 19%
+        let valorImpuesto = totalImpuestos;
 
         let modalHtml = `
         <div class="modal fade" id="cobroModal" tabindex="-1">
@@ -1335,10 +1371,8 @@ $('#ventasTable').on('draw.dt', function() {
                             <label for="montoRecibido" class="form-label">Monto recibido:</label>
                             <input type="number" class="form-control form-control-lg" id="montoRecibido" placeholder="Ingrese el monto recibido">
                             <label for="ObservacionesMovimientos" class="form-label">Observaciones:</label>
-                            <input type="text" class="form-control form-control-lg" id="ObservacionesMovimientos" placeholder="Observaciones>
-                            
-                            
-                            </div>
+                            <input type="text" class="form-control form-control-lg" id="ObservacionesMovimientos" placeholder="Observaciones">
+                        </div>
                         <h3 class="mt-4">Cambio a devolver: $<span id="cambioADevolver">0.00</span></h3>
                         <p>Valor sin Impuesto: $${valorSinImpuesto.toFixed(2)}</p>
                         <p>Valor Impuesto: $${valorImpuesto.toFixed(2)}</p>
@@ -1377,7 +1411,15 @@ $('#ventasTable').on('draw.dt', function() {
             let ObservacionesMovi = $('#ObservacionesMovimientos').val();
             let montoRecibido = parseFloat($('#montoRecibido').val()) || 0;
             if (montoRecibido >= totalGeneral) {
-                finalizarCobro(totalGeneral, valorSinImpuesto, valorImpuesto, metodoPago, montoRecibido);
+                finalizarCobro(
+                    usuario,
+                    proveedor,
+                    bodegaOrigen,
+                    bodegaDestino,
+                    carteraOrigen,
+                    carteraDestino,
+                    
+                    totalGeneral, valorSinImpuesto, valorImpuesto, metodoPago, montoRecibido);
                 cobroModal.hide();
             } else {
                 alert('El monto recibido debe ser igual o mayor al total a cobrar.');
@@ -1385,12 +1427,27 @@ $('#ventasTable').on('draw.dt', function() {
         });
     }
 
-    function finalizarCobro(total, valorSinImpuesto, valorImpuesto, metodoPago, montoRecibido,Observacion) {
-        if (Movimientos) {
+    function finalizarCobro(
+                    usuario,
+                    proveedor,
+                    bodegaOrigen,
+                    bodegaDestino,
+                    carteraOrigen,
+                    carteraDestino,
+                    total, valorSinImpuesto, valorImpuesto, metodoPago, montoRecibido,Observacion) {
+       if (Movimientos) {
             $.ajax({
                 url: `{{ route("movimientos.update", "") }}/${Movimientos.id}`,
                 method: 'PUT',
                 data: {
+                    UsuarioDestino_id:usuario,
+                    OrigenProveedor_id:proveedor,
+                    OrigenBodega_id:bodegaOrigen,
+                    DestinoBodega_id:bodegaDestino,
+                    Cuenta_Entrada: carteraOrigen,
+                    Cuenta_Salida:carteraDestino,
+
+
                     estado: 'Finalizado',
                     Total: total,
                     ValorSinImpuesto: valorSinImpuesto,
@@ -1402,6 +1459,7 @@ $('#ventasTable').on('draw.dt', function() {
                 },
                 success: function (response) {
                     alert('Cobro realizado con éxito');
+                    
                     limpiarInterfaz();
                 },
                 error: function (error) {
@@ -1423,6 +1481,7 @@ $('#ventasTable').on('draw.dt', function() {
         $('#unitCount').text('0');
         $('#pointCount').text('0');
         $('#weightCount').text('0');
+        $('#grandImpuestos').text('0');
         $('#grandTotal').text('$0.00');
         // Limpiar campos de búsqueda
         $('#buscarProveedor, #buscarCliente, #OrigenBodega_id, #DestinoBodega_id').val('');
@@ -1449,7 +1508,6 @@ $('#ventasTable').on('draw.dt', function() {
         }
     });
     });
-
-    </script>
+</script>
 </body>
 </html>

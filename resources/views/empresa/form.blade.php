@@ -32,8 +32,11 @@
             {!! $errors->first('Direccion', '<div class="invalid-feedback">:message</div>') !!}
         </div>
         <div class="form-group">
-            {{ Form::label('Logo') }}
-            {{ Form::text('Logo', $empresa->Logo, ['class' => 'form-control' . ($errors->has('Logo') ? ' is-invalid' : ''), 'placeholder' => 'Logo']) }}
+            {{ Form::label('Logo', 'Logo') }}
+            {{ Form::file('Logo', ['class' => 'form-control-file' . ($errors->has('Logo') ? ' is-invalid' : ''), 'accept' => 'image/*']) }}
+            @if($empresa->Logo)
+                <img src="{{ asset('storage/' . $empresa->Logo) }}" alt="Logo actual" class="mt-2" style="max-width: 200px;">
+            @endif
             {!! $errors->first('Logo', '<div class="invalid-feedback">:message</div>') !!}
         </div>
         <div class="form-group">

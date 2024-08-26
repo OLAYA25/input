@@ -25,6 +25,8 @@ Route::get('movimientos/index/{caja}/{movimiento}', function ($caja,$movimiento)
 
 
 Auth::routes();
+
+Route::get('/movimientos/{id}/pdf', [App\Http\Controllers\MovimientoController::class, 'generarPDF'])->name('movimientos.pdf');
 Route::get('/proveedores/BuscarProveedor', [App\Http\Controllers\ProveedoreController::class, 'BuscarProveedor'])->name('proveedor.BuscarProveedor');
 Route::get('/buscar-cliente', [App\Http\Controllers\UsuariobasicoController::class, 'buscar'])->name('cliente.buscar');
 Route::get('/buscar-producto', [App\Http\Controllers\ProductoController::class, 'buscar'])->name('producto.buscar');

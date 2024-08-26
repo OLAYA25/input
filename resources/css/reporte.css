@@ -1,0 +1,124 @@
+body {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #000;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 0.1px solid #ddd; /* Agregado un borde negro sólido de 1px */
+}
+.row::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+.col-sm-4 {
+    float: left;
+    width: 35%;
+}
+@media screen and (max-width: 600px) {
+    .col-sm-6 {
+        width: 100%;
+    }
+}
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.logo {
+    width: 150px;
+}
+.company-info {
+    text-align: center;
+}
+.company-name {
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.company-details {
+    font-size: 15px;
+}
+.invoice-title {
+    font-size: 15px;
+    font-weight: bold;
+    text-align: center;
+    margin: 10px 0;
+}
+.additional-info {
+    font-size: 8px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+.customer-info {
+width: 100%;
+border-collapse: collapse;
+border: 1px solid #ddd;  /* Margen alrededor de la tabla */
+margin-bottom: 10px;
+font-size: 12px;  /* Reducir tamaño de fuente para compactar más */
+}
+
+.customer-info td {
+padding: 3px 5px;  /* Reducir padding vertical y horizontal */
+border: none;  /* Quitar bordes internos */
+}
+
+
+.customer-info tr:last-child {
+border-bottom: none;  /* Quitar línea de la última fila */
+}
+
+.customer-info-label {
+font-weight: bold;
+margin-right: 5px;
+}
+
+
+ table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 5px;
+}
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    color: #000;
+    font-size: 14px;
+    border-radius: 10px;
+}
+.total-section {
+width: 30%;  /* Reducido de 50% a 30% */
+margin-left: auto;
+margin-right: 0;
+border-collapse: collapse;
+font-size: 10px;  /* Reducido el tamaño de fuente */
+}
+.total-section th, .total-section td {
+padding: 2px 5px;  /* Reducido el padding */
+text-align: left;
+border: 1px solid #ddd;
+}
+.total-section th {
+background-color: #f2f2f2;
+font-weight: bold;
+}
+.total-row:nth-child(even) {
+background-color: #f0f0f0;
+}
+.total-row.total {
+font-weight: bold;
+}
+.amount {
+text-align: right;
+}
+.terms {
+    position: fixed; bottom: 0; left: 0; right: 0; padding: 10px; text-align: center;
+}
