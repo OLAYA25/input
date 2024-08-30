@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('template_title')
-    Codigo
+    Resolucione
 @endsection
 
 @section('content')
@@ -13,11 +13,11 @@
                         <div style="display: flex; justify-content: space-between; align-items: center;">
 
                             <span id="card_title">
-                                {{ __('Codigo') }}
+                                {{ __('Resolucione') }}
                             </span>
 
                              <div class="float-right">
-                                <a href="{{ route('codigos.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
+                                <a href="{{ route('resoluciones.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
                                   {{ __('Create New') }}
                                 </a>
                               </div>
@@ -29,13 +29,9 @@
                         </div>
                     @endif
 
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            @include('codigo.tabla')
-                        </div>
-                    </div>
+                    @include('resolucione.table');
                 </div>
-                    
+                {!! $resoluciones->links() !!}
             </div>
         </div>
     </div>

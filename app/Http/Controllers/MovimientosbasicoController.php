@@ -47,8 +47,8 @@ class MovimientosbasicoController extends Controller
 
         $movimientosbasico = Movimientosbasico::create($request->all());
 
-        return redirect()->route('movimientosbasicos.index')
-            ->with('success', 'Movimientosbasico created successfully.');
+        return redirect()->route('movimientosbasicos.edit',$movimientosbasico->id)
+            ->with('success', 'Movimientos basico Creado .');
     }
 
     /**
@@ -84,14 +84,20 @@ class MovimientosbasicoController extends Controller
      * @param  Movimientosbasico $movimientosbasico
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Movimientosbasico $movimientosbasico)
+    public function updates(Request $request, $id)
     {
-        request()->validate(Movimientosbasico::$rules);
+        // 1. Encontrar el modelo
+        $movimientosbasico = Movimientosbasico::findOrFail($id);
+        
+        // 2. Validar la solicitud
+       
 
+        // 3. Actualizar el modelo
         $movimientosbasico->update($request->all());
 
-        return redirect()->route('movimientosbasicos.index')
-            ->with('success', 'Movimientosbasico updated successfully');
+        // 4. Redirigir con un mensaje de éxito
+        return redirect()->route('movimientosbasicos.edit', ['movimientosbasico' => $movimientosbasico])
+            ->with('success', 'Movimientos básico actualizado correctamente');
     }
 
     /**

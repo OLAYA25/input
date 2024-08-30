@@ -30,12 +30,15 @@
                             @include('caja.form')
 
                         </form>
+                        
+                              
                     </div>
                     @php
                         use App\Models\Parametizarcaja;
                         $parametizarcaja = new Parametizarcaja();
                     @endphp
                     <div class="card-header">
+                    <a href="{{ route('movimientosbasicos.create') }}" class="btn btn-success">{{ __('Siguiente') }}</a>
                         <h3 class="card-title">{{ __('Actualización ') }} parametizar cajas</h3>
                     </div>
                     <div class="panel-body">

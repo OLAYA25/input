@@ -35,7 +35,8 @@ class Movimientosbasico extends Model
      *
      * @var array
      */
-    protected $fillable = ['Codigo','Descripcion','Descuento','Agregar','Alerta','CodigoPredetermidao','OrigenBodega','DestinoBodega','UsuarioOrigen','UsuarioDestino','TituloPiePagina','PiePagina'];
+    protected $fillable = ['Codigo','Descripcion','Descuento', 'Activo'	 ,'Pasivo'	 ,'Patrimonio'	 ,'Ingresos'	 ,'Gastos'	 , 'CostoVenta'	,  'CostoPO'	,  'Deudoras'	  ,'Acreedoras'
+    ,'Agregar','Alerta','CodigoPredetermidao','OrigenBodega','DestinoBodega','UsuarioOrigen','UsuarioDestino','TituloPiePagina','PiePagina','CuentaOrigen','CuentaSalida'];
 
     public function codigos()
     {

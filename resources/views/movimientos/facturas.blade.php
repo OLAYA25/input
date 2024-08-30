@@ -23,7 +23,7 @@
         Página {{ $PAGE_NUM }} de {{ $PAGE_COUNT }}
     </div>
     <div class="row">
-        <div class="col-sm-4">
+        <div class="col-sm-4 logo" >
             <img src="{{ asset('../storage/app/public/logos/' . basename($movimiento->caja->empresas->Logo ?? '')) }}" alt="Logo" style="max-width: 100px; max-height: 100px;">
         </div>
         <div class="col-sm-4">
@@ -86,28 +86,35 @@
         <tr class ="customer-info-label" >
             
             <td>   <span class="customer-info-label">Cliente:</span>
-            {{$movimiento->usuariobasico->Apellido1." " ?? null}}   {{$movimiento->usuariobasico->Apeelido2." "  ?? null}} {{$movimiento->usuariobasico->Nombre1." "  ?? null}} {{$movimiento->usuariobasico->Nombre2." "  ?? null}}
+            @if($movimiento->usuariobasico)
+            {{ ($movimiento->usuariobasico->Apellido1 ?? '') . ' ' . 
+               ($movimiento->usuariobasico->Apeelido2 ?? '') . ' ' . 
+               ($movimiento->usuariobasico->Nombre1 ?? '') . ' ' . 
+               ($movimiento->usuariobasico->Nombre2 ?? '') }}
+            @else
+            N/A
+        @endif
             </td>
 
-            <td > <strong>NIT:</strong> {{$movimiento->usuariobasico->NDocumento." " ?? null}}   </td>
+            <td > <strong>NIT:</strong> {{$movimiento->usuariobasico->NDocumento  ?? ' '}}   </td>
         </tr>
         <tr >
             <td><span class="customer-info-label">Dirección:</span>
-            <span>{{$movimiento->usuariobasico->Direccion." " ?? null}}</span></td>
+            <span>{{$movimiento->usuariobasico->Direccion ?? null}}</span></td>
             <td><span class="customer-info-label">Tipo de Operación:</span>
-            <span> {{$movimiento->movimientosbasico->Descripcion ." " ?? null}}</span> </td>
+            <span> {{$movimiento->movimientosbasico->Descripcion ?? " " }}</span> </td>
         </tr>
         <tr >
             <td><span class="customer-info-label">Teléfono:</span>
-            <span>{{$movimiento->usuariobasico->Telefono." " ?? null}}</span></td>
+            <span>{{$movimiento->usuariobasico->Telefono?? " " }}</span></td>
             <td ><span class="customer-info-label">Fecha de Facturación:</span>
-            <span>{{$movimiento->updated_at." " ?? null}}</span></td>
+            <span>{{$movimiento->updated_at ?? " " }}</span></td>
         </tr>
         <tr >
             <td><span class="customer-info-label">Forma de pago: {{$movimiento->metodoPago." " ?? null}}</span>
             </td>
             <td ><span class="customer-info-label">Fecha de Vencimiento:</span>
-            <span>{{$movimiento->updated_at." " ?? null}}</span></td>
+            <span>{{$movimiento->updated_at ?? " " }}</span></td>
         </tr>
         <tr >
             <td><span class="customer-info-label">Medio de pago:</span>
@@ -118,6 +125,7 @@
 
 
     <table class="products-table">
+    @if ($size === 'carta')
         <tr>
             <th>Ítem</th>
             <th>Descripción</th>
@@ -134,7 +142,29 @@
             <td>{{$productos->TotalValor  }}</td>
         </tr>
         @endforeach
+        @endif
+        @if ($size === 'tirilla')
+        <tr>
+            <th>id</th>
+            <th>Descripción</th>
+           
+            <th>Can</th>
+            <th>Total</th>
+        </tr>
+        @foreach($movimiento->movimientosdatallados as $productos)
+        <tr>
+            <td>{{ $loop->iteration }}</td>
+            <td>{{$productos->productos->Descripcion.' '  }}  {{$productos->Obervacion}}</td>
+            
+            <td>{{$productos->Cantidad_Ingreso  }}</td>
+            <td>{{$productos->TotalValor  }}</td>
+        </tr>
+        @endforeach
+        @endif
     </table>
+    <div class="company-name" style="font-weight: bold; text-align: center; margin-top: 20px; margin-bottom: 20px;">
+    <storage> DETALLE IMPUESTOS</storage> 
+    </div>
     <table class="total-section">
     <tr>
         <th>TIPO</th>
@@ -143,7 +173,7 @@
         <th>COMPRA</th>
     </tr>
     <tr class="total-row">
-        <td>19.00</td>
+    <td></td> 
         <td class="amount">$ {{number_format($movimiento->ValorSinImpuesto, 2, '.', ',')}}</td>
         <td class="amount">$ {{number_format($movimiento->ValorImpuesto, 2, '.', ',')}}</td>
         <td class="amount">$ {{number_format($movimiento->Total, 2, '.', ',')}}</td>
@@ -163,18 +193,29 @@
     
 </div>
 
-    <div class="terms " s>
+    <div class="terms " >
         <h3>{{$movimiento->movimientosbasico->TituloPiePagina ?? NULL}}</h3>
         <ul style="font-size: 10px; padding-left: 20px;">
         {{$movimiento->movimientosbasico->PiePagina ?? NULL}}</ul>
     </div>
 </body>
-@if($size === 'tirilla')
-<script>
+@if ($size === 'tirilla')
+    <script>
     document.addEventListener('DOMContentLoaded', function() {
-        window.print();
-    });
-</script>
+            // Ajustar el ancho de las columnas
+            var table = document.querySelector('.products-table');
+            table.style.tableLayout = 'fixed';
+            
+            var cols = table.querySelectorAll('th, td');
+            cols.forEach(function(col, index) {
+                if (index % 4 === 0) col.style.width = '10%'; // Ítem
+                if (index % 4 === 1) col.style.width = '15%'; // Cantidad
+                if (index % 4 === 2) col.style.width = '55%'; // Descripción
+                if (index % 4 === 3) col.style.width = '20%'; // Total
+            });
+
+            window.print();
+    </script>
 @endif
 
 </html>

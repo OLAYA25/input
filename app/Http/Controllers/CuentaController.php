@@ -47,8 +47,8 @@ class CuentaController extends Controller
 
         $cuenta = Cuenta::create($request->all());
 
-        return redirect()->route('cuentas.index')
-            ->with('success', 'Cuenta created successfully.');
+        return redirect()->back()
+        ->with('success', 'Cuenta creada exitosamente ');
     }
 
 

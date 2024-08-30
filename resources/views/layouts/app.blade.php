@@ -312,10 +312,12 @@
                                             <ul class="collapse">
                                                 <li><a href="{{route('bodegas.index')}}">Bodegas</a></li>
                                                 <li><a href="{{route('movimientosbasicos.index')}}">Movimientos Basicos</a></li>
-                                                <li><a href="#">Unidad Medidas</a></li>
-                                                <li><a href="#">Familias 1</a></li>
-                                                <li><a href="#">Familia 2</a></li>
-                                                <li><a href="#">Familia 3</a></li>
+                                                <li><a href="{{route('familia1s.index')}}">Familias 1</a></li>
+                                                <li><a href="{{route('familia2s.index')}}">Familias 2</a></li>
+                                                <li><a href="{{route('familia3s.index')}}">Familias 3</a></li>
+                                                <li><a href="{{route('codigos.index')}}">Codigos</a></li>
+                                                
+                                        
                                             </ul>
                                         </li>
                                         
@@ -325,51 +327,8 @@
                             <li class="list-divider"></li>
                           
                             
-                        <!--Category name-->
-                        <li>
-                                <a href="#">
-                                <i class="demo-pli-tag "></i>
-                                    <span class="menu-title">Venta/POS
-
-                                    </span>
-                                    <i class="arrow"></i>
-                                </a>
-                                <!--Submenu-->
-                                <ul class="collapse">
-                                    <li><a href="{{route('empresas.index')}}">Empresas</a></li>   
-                                </ul>
-                            </li>
-                            <li class="list-divider"></li>
                              <!--Category name-->
-                        <li>
-                            <a href="#">
-                            <i class="demo-pli-cart-coin"></i>
-                                <span class="menu-title">Compras
-
-                                </span>
-                                <i class="arrow"></i>
-                            </a>
-                            <!--Submenu-->
-                            <ul class="collapse">
-                                <li><a href="{{route('empresas.index')}}">Empresas</a></li>   
-                            </ul>
-                        </li>
-                        <li class="list-divider"></li>
-                         <!--Category name-->
-                         <li>
-                            <a href="#">
-                            <i class="demo-pli-male-female"></i>
-                                <span class="menu-title">Recursos Humanos
-
-                                </span>
-                                <i class="arrow"></i>
-                            </a>
-                            <!--Submenu-->
-                            <ul class="collapse">
-                                <li><a href="{{route('empresas.index')}}">Empresas</a></li>   
-                            </ul>
-                        </li>
-                        <li class="list-divider"></li>
+                       
                          <!--Category name-->
                          <li>
                             <a href="#">
@@ -384,21 +343,7 @@
                                 <li><a href="{{route('impuestos.index')}}">Impuestos</a></li>   
                             </ul>
                         </li>
-                        <li class="list-divider"></li>
-                         <!--Category name-->
-                         <li>
-                            <a href="#">
-                            <i class="demo-pli-basket-coins"></i>
-                                <span class="menu-title">Producto
-
-                                </span>
-                                <i class="arrow"></i>
-                            </a>
-                            <!--Submenu-->
-                            <ul class="collapse">
-                                <li><a href="{{route('empresas.index')}}">Empresas</a></li>   
-                            </ul>
-                        </li>
+                        
                         <li class="list-divider"></li>
                         <li>
                             <a href="#">
@@ -413,7 +358,9 @@
                                 <li><a href="{{route('usuariobasicos.index')}}">Usuario</a></li>  
                                 <li><a href="{{route('cajas.index')}}">Parametizar Cajas</a></li>    
                                 <li><a href="{{route('bancos.index')}}">Bancos</a></li>   
-                                <li><a href="{{route('cuentas.index')}}">Cuentas</a></li>   
+                                <li><a href="{{route('cuentas.index')}}">Cuentas</a></li>
+                                <li><a href="{{route('empresas.index')}}">Empresa</a></li> 
+                                     
                             </ul>
                         </li>
                         <li class="list-divider"></li>
@@ -428,7 +375,7 @@
                             </a>
                             <!--Submenu-->
                             <ul class="collapse">
-                                <li><a href="{{route('empresas.index')}}">Empresas</a></li>   
+                                <li><a href="{{route('empresas.index')}}">Parametrizacion Inicial</a></li>   
                             </ul>
                         </li>
                         

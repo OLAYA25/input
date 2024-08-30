@@ -55,7 +55,7 @@ class EmpresaController extends Controller
 
         $empresa->save();
 
-        return redirect()->route('empresas.index')
+        return redirect()->route('empresas.edit',$empresa->id)
             ->with('success', 'Empresa creada exitosamente.');
     }
 

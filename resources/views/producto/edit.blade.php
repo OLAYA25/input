@@ -56,7 +56,7 @@
 
                         </script>
 
-
+                        <a href="{{ url('movimientos/index') }}" class="btn btn-success">Siguiente</a>
                     </div>
                 </div>
             </div>

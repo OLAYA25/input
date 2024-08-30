@@ -17,9 +17,10 @@
                             </span>
 
                              <div class="float-right">
-                                <a href="{{ route('cuentas.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
+                                <a href="{{ route('cuentas.create') }}" class="btn btn-primary float-right"  data-placement="left">
                                   {{ __('Create New') }}
                                 </a>
+                                <a href="{{ route('cajas.create') }}" class="btn btn-success">{{ __('Siguiente') }}</a>
                               </div>
                         </div>
                     </div>

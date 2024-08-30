@@ -137,7 +137,7 @@
         </div>
         <br>
         <div class="box-footer mt20">
-            <button type="submit" class="btn btn-primary">{{ __('Guardar') }}</button>
+            <button type="submit" class="btn btn-primary">{{ __('Guardar') }}</button>   <a href="{{ route('bodegas.create') }}" class="btn btn-success">{{ __('Siguiente') }}</a>
         </div>
     </div>
   

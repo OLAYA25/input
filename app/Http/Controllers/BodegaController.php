@@ -47,8 +47,8 @@ class BodegaController extends Controller
 
         $bodega = Bodega::create($request->all());
 
-        return redirect()->route('bodegas.index')
-            ->with('success', 'Bodega created successfully.');
+        return redirect()->back()
+        ->with('success', 'Bodega creada exitosamente ');
     }
 
     /**

@@ -18,159 +18,42 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.4.0/css/responsive.bootstrap4.min.css">
-    <style>
-        @media (max-width: 768px) {
-            .dt-buttons {
-                display: flex;
-                flex-direction: column;
-            }
-            .dt-buttons .btn {
-                margin-bottom: 5px;
-            }
-        }
-
-      :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #34495e;
-            --background-color: #f5f5f5;
-            --text-color: #333;
-            --border-color: #dcdcdc;
-        }
-
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.6;
-        }
-
-        .container-fluid {
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .header {
-            background-color: white;
-            border: 1px solid var(--border-color);
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-
-        .logo {
-            font-size: 20px;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        .date-box {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 8px;
-            text-align: center;
-            font-size: 14px;
-        }
-
-        .product-table {
-            background-color: white;
-            border: 1px solid var(--border-color);
-            padding: 15px;
-            margin-bottom: 20px;
-            overflow-x: auto;
-        }
-
-        .product-table th {
-            background-color: var(--secondary-color);
-            color: white;
-        }
-
-        .footer {
-            background-color: white;
-            border: 1px solid var(--border-color);
-            padding: 15px;
-            margin-top: 20px;
-        }
-
-        .total-section {
-            background-color: var(--secondary-color);
-            color: white;
-            padding: 15px;
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .form-control:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.25);
-        }
-
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-
-        .btn-success {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
-        }
-
-        .btn-warning {
-            background-color: #f39c12;
-            border-color: #f39c12;
-            color: white;
-        }
-
-        @media (max-width: 768px) {
-            .table {
-                font-size: 14px; /* Ajusta el tamaño del texto si es necesario */
-            }
-            
-            .table th, .table td {
-                white-space: nowrap;
-                text-overflow: ellipsis;
-                overflow: hidden;
-            }
-            .container-fluid {
-                padding: 10px;
-            }
-
-            .header, .product-table, .footer {
-                padding: 10px;
-            }
-
-            .logo {
-                font-size: 18px;
-            }
-
-            .date-box {
-                font-size: 12px;
-            }
-        }
-                /* Asegúrate de que las tablas sean responsivas */
-        .table-responsive {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        /* Asegúrate de que las columnas se compriman en pantallas pequeñas */
-        @media (max-width: 768px) {
-            
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('../resources/css/movimientoscreate.css') }}">
 </head>
 <body>
     <div class="container-fluid">
         <div class="header">
             <div class="row align-items-center">
                 <div class="col-md-6">
+                  
                     <div class="logo">
                         <i class="fas fa-store"></i> Sistema de Ventas
+                        @if ($movimientosbasico->CuentaOrigen==='1')
                         <a class="fas fa-cash-register" href="#" id="Caja"> </a>
+                        <input type="text" value="{{$caja->CuentaDefectoIngreso ?? NULL}}" id='CajaInput' style='display:none'>
+                        
+                            
+                        @else
+                        <a style="display: none" class="fas fa-cash-register" href="#" id="Caja"> </a>
+                        <input type="text" value="" id='CajaInput' style='display:none'>
+                        
+                        @endif
+
+                        @if ($movimientosbasico->CuentaSalida==='1')
+                         
                         <a class="fas fa-wallet" href="#" id="OCaja"> </a>
                        
-                        <input type="text" value="{{$caja->CuentaDefectoIngreso ?? NULL}}" id='CajaInput' style='display:none'>
                         <input type="text" value="{{$caja->CuentaDefectoSalida ?? NULL}}" id='CajaOnput' style='display:none'>
-                    </div>
+                   
+                            
+                        @else
+                        <a style="display: none" class="fas fa-cash-register" href="#" id="OCaja"> </a>
+                        <input type="text" value="" id='CajaOnput' style='display:none'>
+                        
+                        @endif
+
+                        
+                        </div>
                 </div>
                 <div class="col-md-3">
                     <div class="date-box">
@@ -186,26 +69,56 @@
                 </div>
             </div>
             <div class="row mt-3">
+                @if ($movimientosbasico->UsuarioOrigen==='1')
                 <div class="col-md-3">
                     <label for="buscarProveedor">Proveedor</label>
                     <input type="text" id="Proveedor"  value="{{$caja->ProveedorDefecto ?? NULL}}" class="form-control" style='display:none'>
                     <input type="text" id="buscarProveedor" class="form-control" placeholder="Buscar Proveedor..." readonly>
                 </div>
-                <div class="col-md-3">
+                @else
+                <div class="col-md-3" style="display: none">
+                    <label for="buscarProveedor">Proveedor</label>
+                    <input type="text" id="Proveedor"  value="" class="form-control" style='display:none'>
+                    <input type="text" id="buscarProveedor" class="form-control" placeholder="Buscar Proveedor..." readonly>
+                </div>
+              @endif
+               @if ($movimientosbasico->UsuarioDestino==='1')
+               <div class="col-md-3">
                     <label for="buscarCliente">Usuario</label>
                     <input type="text" id="Users" value="{{$caja->UsuarioDefecto ?? NULL}}" class="form-control" style='display:none'>
                     <input type="text" id="buscarCliente" class="form-control" placeholder="Buscar cliente..." readonly>    
                 </div>
-                <div class="col-md-3">
-                    <label for="OrigenBodega_id">Bodega Origen</label>
-                    <select class="form-select" id="OrigenBodega_id">
-                        <option value="{{$caja->OrigenBodegaDefecto ?? NULL}}" >{{$caja->bodegao->Descripcion ?? "Seleccionar origen"}}</option>
-                        @foreach ($parametizarcajas as $parametizarcaja)
-                            <option value="{{ $parametizarcaja->bodegad_id }}">{{ $parametizarcaja->bodega->Descripcion }}</option>
-                        @endforeach
-                    </select>
-                    <input type="text" id="BodegaOrigen" class="form-control" style='display:none'>
-                </div>
+               @else
+                <div class="col-md-3" style="display: none">
+                        <label for="buscarCliente">Usuario</label>
+                        <input type="text" id="Users" value="" class="form-control" style='display:none'>
+                        <input type="text" id="buscarCliente" class="form-control" placeholder="Buscar cliente..." readonly>    
+                    </div>
+               @endif
+                @if ($movimientosbasico->OrigenBodega==='1')
+                    <div class="col-md-3">
+                        <label for="OrigenBodega_id">Bodega Origen</label>
+                        <select class="form-select" id="OrigenBodega_id">
+                            <option value="{{$caja->OrigenBodegaDefecto ?? NULL}}" >{{$caja->bodegao->Descripcion ?? "Seleccionar origen"}}</option>
+                            @foreach ($parametizarcajas as $parametizarcaja)
+                                <option value="{{ $parametizarcaja->bodegad_id }}">{{ $parametizarcaja->bodega->Descripcion }}</option>
+                            @endforeach
+                        </select>
+                        <input type="text" id="BodegaOrigen" class="form-control" style='display:none'>
+                    </div>
+                @else
+                    <div class="col-md-3" style="display: none">
+                        <label for="OrigenBodega_id">Bodega Origen</label>
+                        <select class="form-select" id="OrigenBodega_id">
+                            <option value="" ></option>
+                            @foreach ($parametizarcajas as $parametizarcaja)
+                                <option value="{{ $parametizarcaja->bodegad_id }}">{{ $parametizarcaja->bodega->Descripcion }}</option>
+                            @endforeach
+                        </select>
+                        <input type="text" id="BodegaOrigen" class="form-control" style='display:none'>
+                    </div>
+                @endif
+                @if ($movimientosbasico->DestinoBodega==='1')
                 <div class="col-md-3">
                     <label for="DestinoBodega_id">Bodega Destino</label>
                     <input type="text" id="BodegaDestino" class="form-control" style='display:none'>
@@ -216,6 +129,19 @@
                         @endforeach
                     </select>
                 </div>
+                @else
+                    <div class="col-md-3" style="display: none">
+                        <label for="DestinoBodega_id">Bodega Destino</label>
+                        <input type="text" id="BodegaDestino" class="form-control" style='display:none'>
+                        <select class="form-select" id="DestinoBodega_id">
+                            <option value=""></option>
+                            @foreach ($parametizarcajas as $parametizarcaja)
+                                <option value="{{ $parametizarcaja->bodegad_id }}">{{ $parametizarcaja->bodega->Descripcion }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
+                
             </div>
         </div>
 

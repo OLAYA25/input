@@ -38,7 +38,7 @@
     use App\Models\Codigoalterno;
     $codigoalternos = Codigoalterno::where('producto_id', $producto->id)->get();
 @endphp
-@include('Codigoalterno.tabla')
+@include('codigoalterno.tabla')
 
 <script>
       document.getElementById('CodigoAlternos').addEventListener('submit', function(event) {

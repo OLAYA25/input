@@ -9,9 +9,9 @@
     <div class="row">
         <div class="col-md-12">
             <style>
-                .computer-grid {
+               .computer-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    grid-template-columns: repeat(4, 1fr);
                     gap: 20px;
                     max-width: 1200px;
                     margin: 0 auto;
@@ -28,6 +28,7 @@
                     justify-content: center;
                     align-items: center;
                     aspect-ratio: 1 / 1;
+                    min-height: 200px;
                 }
                 .computer-box:hover {
                     border-color: #007bff;
@@ -49,23 +50,30 @@
                     width: 100%;
                 }
                 .computer-box i {
-                    font-size: 48px;
+                    font-size: 3em;
                     margin-bottom: 10px;
                 }
                 .computer-box p {
                     margin: 0;
-                    font-size: 16px;
+                    font-size: 1.2em;
                     font-weight: bold;
                 }
-                @media (max-width: 768px) {
+                @media (max-width: 1200px) {
                     .computer-grid {
-                        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                        grid-template-columns: repeat(3, 1fr);
                     }
-                    .computer-box i {
-                        font-size: 36px;
+                }
+                @media (max-width: 992px) {
+                    .computer-grid {
+                        grid-template-columns: repeat(2, 1fr);
                     }
-                    .computer-box p {
-                        font-size: 14px;
+                }
+                @media (max-width: 576px) {
+                    .computer-grid {
+                        grid-template-columns: 1fr;
+                    }
+                    .computer-box {
+                        min-height: 150px;
                     }
                 }
             </style>
@@ -85,60 +93,45 @@
                     <div class="computer-grid">
                         @foreach($computers as $index => $computer)
                             <div class="computer-box">
-                                <a href="#" onclick="valurComputador({{ $computer['id'] }})"  data-toggle="modal" data-target="#Modal{{ $computer['id'] }}">
+                                <a href="#" data-toggle="modal" data-target="#Modal{{ $computer['id'] }}">
                                     <i class="demo-pli-monitor-2"></i>
                                     <p>{{ $computer['Descripcion'] }}</p>
                                 </a>
                             </div>
                             
                             <!-- Modal -->
-                            <div class="modal fade" id="Modal{{ $computer['id'] }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                    <h5 class="modal-title" id="exampleModalLabel">Tipos Movimientos</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <table>
-                                            <thead>
-                                                <tr>
-                                                    <th>
-                                                        Tipos Movimientos
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td>
-                                                        @foreach ($Operaciones as $movimiento)
-                                                        <form action="{{ route('movimientos.crearPendientes', [
-                                                            'users' => Auth::user()->id,
-                                                            'caja' => $computer['id'],
-                                                            'TipoMovimiento' => $movimiento->id
-                                                        ]) }}" method="POST">
-                                                            @csrf
-                                                            <!-- Include other form fields as needed -->
-                                                            <button type="submit">{{$movimiento->Descripcion}}</button>
-                                                        @endforeach
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                            <div class="modal fade" id="Modal{{ $computer['id'] }}" tabindex="-1" role="dialog" aria-labelledby="modalLabel{{ $computer['id'] }}" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                    <div class="modal-content">
                                         
+                                        <div class="modal-header bg-white text-white">
+                                            <h5 class="modal-title" id="modalLabel{{ $computer['id'] }}">Tipos de Movimientos - {{ $computer['Descripcion'] }}</h5>
+                                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="list-group">
+                                                @foreach ($Operaciones as $movimiento)
+                                                    <form action="{{ route('movimientos.crearPendientes', [
+                                                        'users' => Auth::user()->id,
+                                                        'caja' => $computer['id'],
+                                                        'TipoMovimiento' => $movimiento->id
+                                                    ]) }}" method="POST">
+                                                        @csrf
+                                                        <button type="submit" class="list-group-item list-group-item-action">
+                                                            {{$movimiento->Descripcion}}
+                                                        </button>
+                                                    </form>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                        </div>
                                     </div>
-                                    <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                                    
-                                    </div>
-                                </div>
                                 </div>
                             </div>
-
- 
-
                         @endforeach
                     </div>
                 </div>

@@ -18,10 +18,9 @@ class CodigoController extends Controller
      */
     public function index()
     {
-        $codigos = Codigo::paginate();
+        $codigos = Codigo::where('Subcodigo',null)->get();
 
-        return view('codigo.index', compact('codigos'))
-            ->with('i', (request()->input('page', 1) - 1) * $codigos->perPage());
+        return view('codigo.index', compact('codigos'));
     }
 
     /**
@@ -51,6 +50,12 @@ class CodigoController extends Controller
             ->with('success', 'Codigo created successfully.');
     }
 
+
+    public function mostarcodigos($id)
+    {
+        $codigo = Codigo::where('Subcodigo',$id)->get();
+        return $codigo ;
+    }
     /**
      * Display the specified resource.
      *
