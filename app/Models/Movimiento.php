@@ -52,8 +52,8 @@ class Movimiento extends Model
                                 'OrigenProveedor_id','UsuarioDestino_id','DestinoBodega_id',
                                 'users_id','Caja_id','Cuenta_id','ValorImpuesto',
                                 'ValorSinImpuesto','Total','Cuenta_Salida',
-                                'Cuenta_Entrada','estado','update_at',
-                                'estadoMovimientosCaja','metodoPago','montoRecibido','Observacion'];
+                                'Cuenta_Entrada','estado',
+                                'estadoMovimientosCaja','metodoPago','montoRecibido','Observacion','TipoMovimiento'];
    
 
     /**

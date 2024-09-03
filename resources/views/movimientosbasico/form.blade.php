@@ -100,7 +100,7 @@
             </div>
             <!-- Opciones de movimiento -->
             <div class="col-md-3">
-                <h5>Opciones de movimiento:</h5>
+                <h5>Opciones de movimiento en Bodega:</h5>
                 <ul class="list-unstyled">
                     <li>
                         <div class="form-check">

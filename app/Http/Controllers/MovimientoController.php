@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Movimiento;
+use App\Models\CuentasMovimiento;
 use App\Models\Movimientosdatallado;
 use App\Models\Bodegasproducto;
 use Illuminate\Http\Request;
@@ -156,13 +157,48 @@ class MovimientoController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Movimiento $movimiento)
-{
-    $request->validate(Movimiento::$rules);
-    
-  
-    $movimiento->update($request->all());
-    return response()->json($movimiento);
-}
+    {
+        $request->validate(Movimiento::$rules);
+        
+        if ($movimiento->estado === 'Finalizado') {
+            
+            $tiposMovimiento = [
+                'Descuento', 'Agregar', 'Alerta', 'Activo', 'Pasivo', 'Patrimonio', 'Ingresos', 'Gastos', 'CostoVenta', 'CostoPO', 'Deudoras', 'Acreedoras'
+            ];
+
+            $tipoMovimiento = null; // Inicializar variable $tipoMovimiento
+
+            foreach ($tiposMovimiento as $tipo) {
+                if ($movimiento->movimientosbasico->$tipo === 1) {
+                    $tipoMovimiento = $tipo; // Asignar el tipo de movimiento a $tipoMovimiento
+                    if ($tipo == 'Agregar' || $tipo == 'Descuento') {
+                        foreach ($movimiento->movimientosdatallados as $detalle) {
+                            $bodegaId = $movimiento->DestinoBodega_id;
+                            $totalMovimiento = $detalle->Cantidad_Ingreso;
+                            $this->updateBodegaProducto($detalle, $bodegaId, $totalMovimiento);
+                        }
+                    }
+                }
+            }
+            
+             // Verificar si $tipoMovimiento ha sido asignado
+                $valorTotal = $movimiento->Total;
+                
+                $cuentaMovimiento = new CuentasMovimiento();
+                $cuentaMovimiento->Movimiento_id = $movimiento->id;
+                $cuentaMovimiento->Cuenta = $movimiento->Cuenta_Entrada;
+                $cuentaMovimiento->CuentaEgreso = $movimiento->Cuenta_Salida;
+                $cuentaMovimiento->TipoMovimiento = $movimiento->TipoMovimiento;
+                $cuentaMovimiento->DescripcionMovimiento =   $movimiento->movimientosbasico->Descripcion;
+                $cuentaMovimiento->Valor = $valorTotal;
+                $cuentaMovimiento->Codigo_id = $movimiento->movimientosbasico->CodigoPredetermidao;
+                $cuentaMovimiento->save(); // Cambiado de $cuentaMovimiento = CuentasMovimiento::create($cuentaMovimiento); a $cuentaMovimiento->save();
+            
+        }
+        
+        $movimiento->update($request->all());
+        return response()->json($movimiento);
+    }
 
 private function updateBodegaProducto($detalle, $bodegaId, $totalMovimiento)
 {
