@@ -43,7 +43,14 @@ class UsuariobasicoController extends Controller
         $usuariobasico = new Usuariobasico();
         return view('usuariobasico.create', compact('usuariobasico'));
     }
+    public function stores(Request $request)
+    {
+        request()->validate(Usuariobasico::$rules);
 
+        $usuariobasico = Usuariobasico::create($request->all());
+
+        return response()->json($usuariobasico);
+    }
     /**
      * Store a newly created resource in storage.
      *

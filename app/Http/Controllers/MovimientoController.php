@@ -169,14 +169,22 @@ class MovimientoController extends Controller
             $tipoMovimiento = null; // Inicializar variable $tipoMovimiento
 
             foreach ($tiposMovimiento as $tipo) {
-                if ($movimiento->movimientosbasico->$tipo === 1) {
+                if ($movimiento->movimientosbasico->$tipo == 1) {
                     $tipoMovimiento = $tipo; // Asignar el tipo de movimiento a $tipoMovimiento
-                    if ($tipo == 'Agregar' || $tipo == 'Descuento') {
+                    if ($tipo == 'Agregar' ) {
                         foreach ($movimiento->movimientosdatallados as $detalle) {
                             $bodegaId = $movimiento->DestinoBodega_id;
                             $totalMovimiento = $detalle->Cantidad_Ingreso;
                             $this->updateBodegaProducto($detalle, $bodegaId, $totalMovimiento);
+                           
                         }
+                    }
+                    if ($tipo == 'Descuento') {
+                            foreach ($movimiento->movimientosdatallados as $detalle) {
+                                $bodegaId = $movimiento->OrigenBodega_id;
+                                $totalMovimiento = $detalle->Cantidad_Ingreso;
+                                $this->updateBodegaProducto($detalle, $bodegaId, -$totalMovimiento);
+                            }
                     }
                 }
             }

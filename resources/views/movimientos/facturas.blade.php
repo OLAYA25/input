@@ -8,14 +8,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Factura</title>
-    <style>
+    
         @if ($size === 'carta'||$size === 'ofici' )
+        <style>
             @import url('{{ asset('../resources/css/reportecarta.css') }}');
+        </style>
         @elseif ($size === 'tirilla')
+        <style>
             @import url('{{ asset('../resources/css/tirilla.css') }}');
+        </style>
         @endif
 
-    </style>
+   
 </head>
 <body>
     
@@ -113,12 +117,16 @@
         <tr >
             <td><span class="customer-info-label">Forma de pago: {{$movimiento->metodoPago." " ?? null}}</span>
             </td>
-            <td ><span class="customer-info-label">Fecha de Vencimiento:</span>
-            <span>{{$movimiento->updated_at ?? " " }}</span></td>
+            <td ><span class="customer-info-label">Observacion:</span>
+            <span>{{$movimiento->Observacion ?? " " }}</span></td>
         </tr>
         <tr >
             <td><span class="customer-info-label">Medio de pago:</span>
-            <span>{{$movimiento->medioPago." " ?? null}}</span></td>
+            <span>{{$movimiento->medioPago." " ?? null}} 
+                @if($movimiento->metodoPago=="CUENTA BANCARIA") 
+                    {{$movimiento->cuentaI->descripcion ?? NULL}}
+                @endif
+                </span></td>
             <td ></td>
         </tr>
     </table>
@@ -167,25 +175,39 @@
     </div>
     <table class="total-section">
     <tr>
+        
         <th>TIPO</th>
-        <th>BASE/IMP</th>
+        
+       
         <th>IMP</th>
+        <th>BASE/IMP</th>
+        <th>Descuento</th>
         <th>COMPRA</th>
     </tr>
+
     <tr class="total-row">
-    <td></td> 
-        <td class="amount">$ {{number_format($movimiento->ValorSinImpuesto, 2, '.', ',')}}</td>
-        <td class="amount">$ {{number_format($movimiento->ValorImpuesto, 2, '.', ',')}}</td>
-        <td class="amount">$ {{number_format($movimiento->Total, 2, '.', ',')}}</td>
+        @if(method_exists($movimiento, 'movimientosdatallados'))
+            @foreach ($movimiento->movimientosdatallados as $productos)
+            <td class="amount">{{$productos->Impuesto ?? '0'}}  %</td>
+                <td class="amount">$ {{number_format($productos->Impuesto_id, 2, '.', ',')}}</td>
+                <td class="amount">$ {{number_format($productos->TotalValor / (1 + ($productos->Impuesto / 100)), 2, '.', ',')}}</td>
+                <td class="amount">$ {{number_format($productos->Descuento, 2, '.', ',')}}</td>
+                <td class="amount">$ {{number_format($productos->TotalValor, 2, '.', ',')}}</td>
+            @endforeach
+        @endif
+        
     </tr>
     <tr class="total-row total">
         <td>TOTAL</td>
-        <td class="amount">$ {{number_format($movimiento->ValorSinImpuesto, 2, '.', ',')}}</td>
         <td class="amount">$ {{number_format($movimiento->ValorImpuesto, 2, '.', ',')}}</td>
+        <td class="amount">$ {{number_format($movimiento->ValorSinImpuesto, 2, '.', ',')}}</td>
+        
+        <td class="amount"></td>
+             
         <td class="amount">$ {{number_format($movimiento->Total, 2, '.', ',')}}</td>
     </tr>
     <tr class="total-a-pagar">
-        <td colspan="3"><strong>TOTAL A PAGAR:</strong></td>
+        <td colspan="4"><strong>TOTAL A PAGAR:</strong></td>
         <td class="amount">$ {{number_format($movimiento->Total, 2, '.', ',')}}</td>
     </tr>
 </table>

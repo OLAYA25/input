@@ -117,7 +117,7 @@
                                                         'users' => Auth::user()->id,
                                                         'caja' => $computer['id'],
                                                         'TipoMovimiento' => $movimiento->id
-                                                    ]) }}" method="POST">
+                                                    ]) }}" method="get">
                                                         @csrf
                                                         <button type="submit" class="list-group-item list-group-item-action">
                                                             {{$movimiento->Descripcion}}

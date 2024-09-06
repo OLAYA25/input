@@ -68,6 +68,11 @@ class Caja extends Model
     {
         return $this->hasOne('App\Models\Empresa', 'id', 'Empresas_id');
     }
+    public function movmientosbasicos()
+    {
+        return $this->hasOne('App\Models\Empresa', 'id', 'CajaPredeterminada');
+    }
+    
    
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

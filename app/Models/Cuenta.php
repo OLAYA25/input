@@ -74,6 +74,11 @@ class Cuenta extends Model
     {
         return $this->hasMany('App\Models\Movimiento', 'Cuenta_Salida', 'id');
     }
+    public function movimientosI()
+    {
+        return $this->hasMany('App\Models\Movimiento', 'Cuenta_Entrada', 'id');
+    }
+    
     
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

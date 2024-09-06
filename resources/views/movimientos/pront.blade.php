@@ -190,8 +190,8 @@
 
     <div class="mt-3">
         <button id="buscarPendientesBtn" class="btn btn-primary">Buscar Pendientes</button>
-        <button id="finalizarMovimientoBtn" class="btn btn-success">Finalizar Movimiento</button>
-        <button id="abrirCobroBtn" class="btn btn-warning">Abrir Cobro</button>
+        <button id="finalizarMovimientoBtn" class="btn btn-success"> Movimiento Pendiente</button>
+        <button id="abrirCobroBtn" class="btn btn-warning"> FinalizarCobro</button>
     </div>
 </div>
 
@@ -206,10 +206,11 @@
             <div class="modal-body">
                 <input type="text" id="searchModalInput" class="form-control" placeholder="Buscar...">
                 <div id="searchResults" class="mt-3"></div>
-            </div>
+              </div>
         </div>
     </div>
 </div>
+
  <!-- Modal para movimientos Cierre -->
 <div id="movimientosModal" class="modal fade" tabindex="-1" aria-labelledby="movimientosModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -326,3 +327,5 @@
 <!-- DataTables Responsive -->
 <script src="https://cdn.datatables.net/responsive/2.4.0/js/dataTables.responsive.min.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.4.0/js/responsive.bootstrap4.min.js"></script>
+
+@include('movimientos.usuarios')

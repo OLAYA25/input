@@ -83,9 +83,9 @@ class Movimiento extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
-    public function cuenta()
+    public function cuentaI()
     {
-        return $this->hasOne('App\Models\Cuenta', 'id', 'Cuenta_id');
+        return $this->hasOne('App\Models\Cuenta', 'id', 'Cuenta_Entrada');
     }
     
     public function cuentaE()

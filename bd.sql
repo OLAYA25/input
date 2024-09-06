@@ -48,11 +48,12 @@ CREATE TABLE IF NOT EXISTS `actualizarprecios` (
   KEY `FK__product` (`Producto_id`),
   CONSTRAINT `FK__product` FOREIGN KEY (`Producto_id`) REFERENCES `productos` (`id`) ON DELETE CASCADE,
   CONSTRAINT `FK__proveedo` FOREIGN KEY (`Proveedor_id`) REFERENCES `proveedores` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Volcando datos para la tabla input.actualizarprecios: ~0 rows (aproximadamente)
 INSERT INTO `actualizarprecios` (`id`, `Producto_id`, `Impuesto_id`, `ImpuestoPorcentageTotal`, `Principal`, `ValorBase`, `Utilidad`, `UtilidadPorc`, `ValorPublico`, `Proveedor_id`, `Descuento1`, `Cantidad1`, `Descuento2`, `Cantidad2`, `Descuento3`, `Cantidad3`, `PorcentajeVendedor`, `ImpuestoPublico`, `ValorPublicoConImpuestos`, `CantidadVendedor`, `created_at`, `updated_at`) VALUES
-	(36, 16, '0.00', '0', '1', '10000', '15000.00', '150.00', '25000.00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '25000', NULL, NULL, '2024-08-30 04:04:34', '2024-08-30 04:04:34');
+	(36, 16, '0.00', '0', '1', '10000', '15000.00', '150.00', '25000.00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '25000', NULL, NULL, '2024-08-30 04:04:34', '2024-08-30 04:04:34'),
+	(37, 17, '0.00', '0', '1', '0', '45000.00', 'Infinity', '45000.00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '45000', NULL, NULL, '2024-09-03 20:10:32', '2024-09-03 20:10:32');
 
 -- Volcando estructura para tabla input.bancos
 CREATE TABLE IF NOT EXISTS `bancos` (
@@ -122,9 +123,12 @@ CREATE TABLE IF NOT EXISTS `bodegasproductos` (
   KEY `Bodega` (`Bodega`),
   CONSTRAINT `bodegasproductos_ibfk_1` FOREIGN KEY (`Producto`) REFERENCES `productos` (`id`) ON DELETE CASCADE,
   CONSTRAINT `bodegasproductos_ibfk_2` FOREIGN KEY (`Bodega`) REFERENCES `bodegas` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Volcando datos para la tabla input.bodegasproductos: ~0 rows (aproximadamente)
+-- Volcando datos para la tabla input.bodegasproductos: ~2 rows (aproximadamente)
+INSERT INTO `bodegasproductos` (`id`, `Producto`, `Cantidad`, `Bodega`, `estado`, `created_at`, `updated_at`) VALUES
+	(6, 16, 10, NULL, 'Activo', '2024-09-03 19:01:18', '2024-09-03 19:20:42'),
+	(7, 16, 4, 4, 'Activo', '2024-09-03 19:07:20', '2024-09-03 19:20:42');
 
 -- Volcando estructura para tabla input.cajas
 CREATE TABLE IF NOT EXISTS `cajas` (
@@ -153,14 +157,12 @@ CREATE TABLE IF NOT EXISTS `cajas` (
   CONSTRAINT `FK_cajas_cuentas_2` FOREIGN KEY (`CuentaDefectoSalida`) REFERENCES `cuentas` (`id`) ON DELETE CASCADE,
   CONSTRAINT `FK_cajas_empresas` FOREIGN KEY (`Empresas_id`) REFERENCES `empresas` (`id`) ON DELETE CASCADE,
   CONSTRAINT `FK_cajas_usuariobasicos` FOREIGN KEY (`UsuarioDefecto`) REFERENCES `usuariobasicos` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Volcando datos para la tabla input.cajas: ~4 rows (aproximadamente)
+-- Volcando datos para la tabla input.cajas: ~1 rows (aproximadamente)
 INSERT INTO `cajas` (`id`, `Descripcion`, `Empresas_id`, `CuentaDefectoIngreso`, `CuentaDefectoSalida`, `UsuarioDefecto`, `OrigenBodegaDefecto`, `DestinoBodegaDefecto`, `estado`, `numero`, `created_at`, `updated_at`) VALUES
-	(11, 'CAJA01', 4, 5, NULL, NULL, 4, 4, 'Activo', '01', '2024-08-30 03:57:37', '2024-08-30 03:57:37'),
-	(12, 'CAJA02', 4, 4, NULL, NULL, 4, NULL, 'Activo', '02', '2024-08-30 04:10:16', '2024-08-30 04:10:16'),
-	(13, 'CAJA01', 4, 5, NULL, NULL, 4, 4, 'Activo', '01', '2024-08-30 03:57:37', '2024-08-30 03:57:37'),
-	(14, 'CAJA01', 4, 5, NULL, NULL, 4, 4, 'Activo', '01', '2024-08-30 03:57:37', '2024-08-30 03:57:37');
+	(11, 'Movimientos', 4, 5, NULL, NULL, 4, 4, 'Activo', '01', '2024-08-30 03:57:37', '2024-09-03 20:23:44'),
+	(15, 'BODEGA1', NULL, NULL, NULL, NULL, 4, 4, 'Activo', NULL, '2024-09-03 22:03:42', '2024-09-03 22:03:42');
 
 -- Volcando estructura para tabla input.cargos
 CREATE TABLE IF NOT EXISTS `cargos` (
@@ -221,11 +223,12 @@ CREATE TABLE IF NOT EXISTS `codigoalternos` (
   PRIMARY KEY (`id`),
   KEY `fk_codigoalterno_producto1_idx` (`producto_id`),
   CONSTRAINT `fk_codigoalterno_producto1` FOREIGN KEY (`producto_id`) REFERENCES `productos` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Volcando datos para la tabla input.codigoalternos: ~0 rows (aproximadamente)
 INSERT INTO `codigoalternos` (`id`, `Descripcion`, `estado`, `cantidad`, `created_at`, `updated_at`, `producto_id`) VALUES
-	(9, 'RMIMPRESRAS', 'Activo', '1', '2024-08-30 04:04:03', '2024-08-30 04:04:03', 16);
+	(9, 'RMIMPRESRAS', 'Activo', '1', '2024-08-30 04:04:03', '2024-08-30 04:04:03', 16),
+	(10, '12', 'Activo', '1', '2024-09-03 20:10:46', '2024-09-03 20:10:46', 17);
 
 -- Volcando estructura para tabla input.codigos
 CREATE TABLE IF NOT EXISTS `codigos` (
@@ -2739,8 +2742,10 @@ INSERT INTO `cuentas` (`id`, `bancos_id`, `descripcion`, `tipo`, `numero`, `esta
 CREATE TABLE IF NOT EXISTS `cuentas_movimientos` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `Cuenta` bigint(20) unsigned DEFAULT NULL,
+  `CuentaEgreso` bigint(20) unsigned DEFAULT NULL,
   `Codigo_id` bigint(20) DEFAULT NULL,
   `Movimiento_id` bigint(20) unsigned DEFAULT NULL,
+  `TipoMovimiento` text DEFAULT NULL,
   `DescripcionMovimiento` text DEFAULT NULL,
   `Valor` text DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -2749,10 +2754,12 @@ CREATE TABLE IF NOT EXISTS `cuentas_movimientos` (
   KEY `FK__codigos` (`Codigo_id`),
   KEY `FK__movimientos` (`Movimiento_id`),
   KEY `FK__cuentas` (`Cuenta`),
+  KEY `FK_cuentas_movimientos_cuentas` (`CuentaEgreso`),
   CONSTRAINT `FK__codigos` FOREIGN KEY (`Codigo_id`) REFERENCES `codigos` (`id`) ON DELETE CASCADE,
   CONSTRAINT `FK__cuentas` FOREIGN KEY (`Cuenta`) REFERENCES `cuentas` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `FK__movimientos` FOREIGN KEY (`Movimiento_id`) REFERENCES `movimientos` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  CONSTRAINT `FK__movimientos` FOREIGN KEY (`Movimiento_id`) REFERENCES `movimientos` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK_cuentas_movimientos_cuentas` FOREIGN KEY (`CuentaEgreso`) REFERENCES `cuentas` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Volcando datos para la tabla input.cuentas_movimientos: ~0 rows (aproximadamente)
 
@@ -2791,7 +2798,7 @@ CREATE TABLE IF NOT EXISTS `empresas` (
 
 -- Volcando datos para la tabla input.empresas: ~0 rows (aproximadamente)
 INSERT INTO `empresas` (`id`, `nit`, `nombre`, `tipo_regimen`, `NRegimen`, `Email`, `Direccion`, `Logo`, `Telefono`, `NombreReprent`, `estado`, `created_at`, `updated_at`) VALUES
-	(4, '1006456463-7', '@INPUT SYSTEM', 'Natural', '1006456463-7', 'javierlozano2001@hotmail.com', 'CARRERA 48a #22-36 BRISAS', 'logos/A8TeXheirb8w53QzhPwAq5eaPv0yhCBG5YMgS247.png', '3134402412', 'JAVIER ALBERTO LOZANO MARQUEZ', 'Activo', '2024-08-30 03:33:19', '2024-08-30 03:33:19');
+	(4, '1006456463-7', '@INPUT SYSTEM', 'Natural', '1006456463-7', 'javierlozano2001@hotmail.com', 'Cr 48a #22-36 BRISAS', 'logos/A8TeXheirb8w53QzhPwAq5eaPv0yhCBG5YMgS247.png', '3134402412', 'JAVIER ALBERTO LOZANO MARQUEZ', 'Activo', '2024-08-30 03:33:19', '2024-09-03 20:15:21');
 
 -- Volcando estructura para tabla input.failed_jobs
 CREATE TABLE IF NOT EXISTS `failed_jobs` (
@@ -2903,6 +2910,7 @@ CREATE TABLE IF NOT EXISTS `movimientos` (
   `Cuenta_id` bigint(20) unsigned DEFAULT NULL,
   `Cuenta_Salida` bigint(20) unsigned DEFAULT NULL,
   `Cuenta_Entrada` bigint(20) unsigned DEFAULT NULL,
+  `TipoMovimiento` text DEFAULT NULL,
   `ValorImpuesto` text DEFAULT NULL,
   `ValorSinImpuesto` text DEFAULT NULL,
   `Total` text DEFAULT NULL,
@@ -2910,6 +2918,7 @@ CREATE TABLE IF NOT EXISTS `movimientos` (
   `metodoPago` text DEFAULT NULL,
   `medioPago` text DEFAULT NULL,
   `montoRecibido` text DEFAULT NULL,
+  `Observacion` text DEFAULT NULL,
   `estadoMovimientosCaja` text DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -2934,17 +2943,18 @@ CREATE TABLE IF NOT EXISTS `movimientos` (
   CONSTRAINT `FK_movimientos_proveedores` FOREIGN KEY (`OrigenProveedor_id`) REFERENCES `proveedores` (`id`) ON DELETE CASCADE,
   CONSTRAINT `FK_movimientos_users` FOREIGN KEY (`users_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `FK_movimientos_usuariobasicos` FOREIGN KEY (`UsuarioDestino_id`) REFERENCES `usuariobasicos` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=273 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=280 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Volcando datos para la tabla input.movimientos: ~2 rows (aproximadamente)
-INSERT INTO `movimientos` (`id`, `TipoMovimiento_id`, `OrigenBodega_id`, `OrigenProveedor_id`, `UsuarioDestino_id`, `DestinoBodega_id`, `users_id`, `Caja_id`, `Cuenta_id`, `Cuenta_Salida`, `Cuenta_Entrada`, `ValorImpuesto`, `ValorSinImpuesto`, `Total`, `estado`, `metodoPago`, `medioPago`, `montoRecibido`, `estadoMovimientosCaja`, `created_at`, `updated_at`) VALUES
-	(271, 15, NULL, NULL, 8, NULL, 3, 11, NULL, NULL, 5, NULL, NULL, NULL, 'Pendiente', NULL, NULL, NULL, 'EnEjecucion', '2024-08-31 02:52:30', '2024-08-31 02:52:30'),
-	(272, 15, NULL, NULL, NULL, NULL, 3, 11, NULL, NULL, 5, '0', '25000', '25000', 'Finalizado', 'EFECTIVO', NULL, '25000', 'EnEjecucion', '2024-08-31 03:23:19', '2024-08-31 03:23:32');
+INSERT INTO `movimientos` (`id`, `TipoMovimiento_id`, `OrigenBodega_id`, `OrigenProveedor_id`, `UsuarioDestino_id`, `DestinoBodega_id`, `users_id`, `Caja_id`, `Cuenta_id`, `Cuenta_Salida`, `Cuenta_Entrada`, `TipoMovimiento`, `ValorImpuesto`, `ValorSinImpuesto`, `Total`, `estado`, `metodoPago`, `medioPago`, `montoRecibido`, `Observacion`, `estadoMovimientosCaja`, `created_at`, `updated_at`) VALUES
+	(271, 15, NULL, NULL, 8, NULL, 3, 11, NULL, NULL, 5, 'Acreedoras', '0', '25000', '25000', 'Pendiente', NULL, NULL, NULL, NULL, 'EnEjecucion', '2024-08-31 02:52:30', '2024-09-03 20:18:12'),
+	(272, 15, NULL, NULL, NULL, NULL, 3, 11, NULL, NULL, 5, NULL, '0', '25000', '2500', 'Finalizado', 'EFECTIVO', NULL, '25000', NULL, 'EnEjecucion', '2024-08-31 03:23:19', '2024-09-03 07:02:21');
 
 -- Volcando estructura para tabla input.movimientosbasicos
 CREATE TABLE IF NOT EXISTS `movimientosbasicos` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `CodigoPredetermidao` bigint(20) DEFAULT NULL,
+  `CajaPredeterminada` bigint(20) DEFAULT NULL,
   `Codigo` varchar(50) DEFAULT NULL,
   `Descripcion` varchar(50) DEFAULT NULL,
   `Descuento` varchar(50) DEFAULT NULL,
@@ -2971,12 +2981,14 @@ CREATE TABLE IF NOT EXISTS `movimientosbasicos` (
   `created_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_movimientosbasicos_codigos` (`CodigoPredetermidao`),
+  KEY `FK_movimientosbasicos_cajas` (`CajaPredeterminada`),
+  CONSTRAINT `FK_movimientosbasicos_cajas` FOREIGN KEY (`CajaPredeterminada`) REFERENCES `cajas` (`id`) ON DELETE CASCADE,
   CONSTRAINT `FK_movimientosbasicos_codigos` FOREIGN KEY (`CodigoPredetermidao`) REFERENCES `codigos` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Volcando datos para la tabla input.movimientosbasicos: ~2 rows (aproximadamente)
-INSERT INTO `movimientosbasicos` (`id`, `CodigoPredetermidao`, `Codigo`, `Descripcion`, `Descuento`, `Agregar`, `Alerta`, `OrigenBodega`, `DestinoBodega`, `UsuarioOrigen`, `UsuarioDestino`, `CuentaOrigen`, `CuentaSalida`, `TituloPiePagina`, `PiePagina`, `Activo`, `Pasivo`, `Patrimonio`, `Ingresos`, `Gastos`, `CostoVenta`, `CostoPO`, `Deudoras`, `Acreedoras`, `updated_at`, `created_at`) VALUES
-	(15, 4027, 'TI', 'SERVICIO TECNICO', NULL, NULL, '1', NULL, NULL, NULL, '1', '1', NULL, 'Terminos Condiciones', 'El servicio tiene  una garantía de 1 mes respectivamente al servicio prestado también y los respuesta respectivamente.', NULL, NULL, NULL, '1', NULL, NULL, NULL, NULL, NULL, '2024-08-30 22:21:50', '2024-08-31 02:48:51');
+-- Volcando datos para la tabla input.movimientosbasicos: ~1 rows (aproximadamente)
+INSERT INTO `movimientosbasicos` (`id`, `CodigoPredetermidao`, `CajaPredeterminada`, `Codigo`, `Descripcion`, `Descuento`, `Agregar`, `Alerta`, `OrigenBodega`, `DestinoBodega`, `UsuarioOrigen`, `UsuarioDestino`, `CuentaOrigen`, `CuentaSalida`, `TituloPiePagina`, `PiePagina`, `Activo`, `Pasivo`, `Patrimonio`, `Ingresos`, `Gastos`, `CostoVenta`, `CostoPO`, `Deudoras`, `Acreedoras`, `updated_at`, `created_at`) VALUES
+	(15, 4027, 11, 'TI', 'SERVICIO TECNICO', NULL, NULL, '1', NULL, NULL, NULL, '1', '1', NULL, 'Terminos Condiciones', 'El servicio tiene  una garantía de 1 mes respectivamente al servicio prestado también y los respuesta respectivamente.', NULL, NULL, NULL, '1', NULL, NULL, NULL, NULL, NULL, '2024-09-05 15:27:09', '2024-08-31 02:48:51');
 
 -- Volcando estructura para tabla input.movimientosdatallados
 CREATE TABLE IF NOT EXISTS `movimientosdatallados` (
@@ -2998,7 +3010,7 @@ CREATE TABLE IF NOT EXISTS `movimientosdatallados` (
   KEY `FK_movimientosdatallados_productos` (`Producto_id`),
   CONSTRAINT `FK_movimientosdatallado_movimientos` FOREIGN KEY (`Movimientos_id`) REFERENCES `movimientos` (`id`) ON DELETE CASCADE,
   CONSTRAINT `FK_movimientosdatallados_productos` FOREIGN KEY (`Producto_id`) REFERENCES `productos` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=281 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=290 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Volcando datos para la tabla input.movimientosdatallados: ~2 rows (aproximadamente)
 INSERT INTO `movimientosdatallados` (`id`, `Movimientos_id`, `Producto_id`, `Cantidad_Ingreso`, `Valor_Unitario`, `TotalValor`, `Impuesto_id`, `Impuesto`, `Descuento`, `users_id`, `Obervacion`, `created_at`, `updated_at`) VALUES
@@ -3132,11 +3144,12 @@ CREATE TABLE IF NOT EXISTS `productos` (
   CONSTRAINT `FK_producto_familia2` FOREIGN KEY (`familia2_id`) REFERENCES `familia2s` (`id`) ON DELETE CASCADE,
   CONSTRAINT `FK_producto_familia3` FOREIGN KEY (`familia3_id`) REFERENCES `familia3s` (`id`) ON DELETE CASCADE,
   CONSTRAINT `FK_productos_unidadmedidas` FOREIGN KEY (`unidadmedida_id`) REFERENCES `unidadmedidas` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Volcando datos para la tabla input.productos: ~0 rows (aproximadamente)
 INSERT INTO `productos` (`id`, `Descripcion`, `Imagen`, `Estado`, `Existencias`, `Stock_Max`, `Stock_Min`, `VenderNegativos`, `DescInventario`, `NumeroSerial`, `Talla`, `Largor`, `Alto`, `Ancho`, `Observaciones`, `familia1_id`, `familia2_id`, `familia3_id`, `unidadmedida_id`, `created_at`, `updated_at`) VALUES
-	(16, 'MANTENIMIENTOS IMPRESORA', NULL, 'Activo', NULL, NULL, NULL, NULL, NULL, '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2024-08-30 04:03:37', '2024-08-30 04:03:37');
+	(16, 'MANTENIMIENTOS IMPRESORA', NULL, 'Activo', NULL, NULL, NULL, NULL, NULL, '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2024-08-30 04:03:37', '2024-08-30 04:03:37'),
+	(17, 'FORMATEO DE PC', NULL, 'Activo', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2024-09-03 20:09:30', '2024-09-03 20:09:30');
 
 -- Volcando estructura para tabla input.proveedores
 CREATE TABLE IF NOT EXISTS `proveedores` (
@@ -3250,11 +3263,17 @@ CREATE TABLE IF NOT EXISTS `usuariobasicos` (
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Volcando datos para la tabla input.usuariobasicos: ~1 rows (aproximadamente)
+-- Volcando datos para la tabla input.usuariobasicos: ~7 rows (aproximadamente)
 INSERT INTO `usuariobasicos` (`id`, `TipoDocumento`, `NDocumento`, `Nombre1`, `Nombre2`, `Apellido1`, `Apeelido2`, `Telefono`, `Email`, `Checkproveedor`, `estado`, `FechaNacimiento`, `Genero`, `TelefonoFijo`, `TelefonoMovil`, `Sexo`, `Direccion`, `CheckEmpleado`, `created_at`, `updated_at`) VALUES
-	(8, 'CC', '1', 'VENTAS', NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2024-08-30 03:36:07', '2024-08-30 03:36:07');
+	(8, 'CC', '1', 'VENTAS', NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2024-08-30 03:36:07', '2024-08-30 03:36:07'),
+	(9, 'CC', '1006456463', 'VENTAS', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2024-09-03 21:50:13', '2024-09-03 21:50:13'),
+	(10, 'CC', '1116853866', 'LISETH', 'TATIANA', 'SANCHEZ', NULL, NULL, 'lisethsan.14@gmail.com', NULL, 'Activo', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2024-09-04 00:42:09', '2024-09-04 00:42:09'),
+	(11, 'CC', '68305002', 'NELLY', 'ROSMIRA', 'MARQUEZ', NULL, '3203947708', 'nelly@hotmcom.com', NULL, 'Activo', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2024-09-04 01:09:43', '2024-09-04 01:09:43'),
+	(12, 'CC', '1116853866', 'LISETH', 'TATIANA', 'SANCHEZ', NULL, '3134402412', 'javierlozano2001@hotmail.com', NULL, 'Activo', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2024-09-04 01:11:59', '2024-09-04 01:11:59'),
+	(13, 'TI', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Activo', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2024-09-04 01:12:39', '2024-09-04 01:12:39'),
+	(14, 'CC', '1116853866', 'LISETH', 'TATIANA', 'SANCHEZ', NULL, '3134402412', NULL, NULL, 'Activo', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2024-09-04 01:37:29', '2024-09-04 01:37:29');
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

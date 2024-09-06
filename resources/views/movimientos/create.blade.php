@@ -329,10 +329,14 @@
                 case 'cliente':
                     labelText = 'Cliente';
                     placeholderText = 'Ingrese nombre o ID de cliente';
+                    // Agregar botón de crear usuario o proveedor solo para clientes
+                    $('#searchModal .modal-body').append('<button id="crearUsuarioProveedorBtn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Crear Usuario </button>');
                     break;
                 case 'proveedor':
                     labelText = 'Proveedor';
                     placeholderText = 'Ingrese nombre o ID de proveedor';
+                    $('#searchModal .modal-body').append('<button id="crearUsuarioProveedorBtn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#Proveedor">Crear Proveedor</button>');
+                    
                     break;
                 case 'caja':
                     labelText = 'Caja';
@@ -434,6 +438,11 @@
             $(inputId).val(nombre);
             $(hiddenInputId).val(id);
             searchModal.hide();
+        });
+
+        // Eliminar el botón de crear usuario o proveedor al cerrar el modal
+        $('#searchModal').on('hidden.bs.modal', function () {
+            $('#crearUsuarioProveedorBtn').remove();
         });
 
         // Actualización de fecha
@@ -1060,6 +1069,7 @@
                         <select id="metodoPago" class="form-select mt-3">
                             <option value="EFECTIVO">Efectivo</option>
                             <option value="TARJETA">Tarjeta</option>
+                            <option value="CUENTA BANCARIA">Cuenta Bancaria</option>
                         </select>
                     </div>
                     <div class="modal-footer">

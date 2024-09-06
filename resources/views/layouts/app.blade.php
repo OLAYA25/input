@@ -1,4 +1,9 @@
 
+
+@php
+    $empresa = App\Models\Empresa::where('estado', 'activo')->first()
+
+@endphp
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,6 +12,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
     <title>Soporte</title>
     <!--STYLESHEET-->
     <!--=================================================-->
@@ -148,16 +154,15 @@
                                 <ul class="head-list">
                                     
                                     <li>
-                                        <a href="#"><i class="demo-pli-male icon-lg icon-fw"></i> Profile</a>
+                                        <a href=""><i class="demo-pli-male icon-lg icon-fw"></i> Perfil</a>
                                     </li>
                                     <li>
-                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                    <a class="dropdown-item" href="{{ route('logout') }}"
-                                    onclick="event.preventDefault();
-                                                document.getElementById('logout-form').submit();"> <i class="demo-pli-unlock icon-lg icon-fw"></i>
-                                         </a>
-                                        
-                                    </form>
+                                        <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                            <i class="demo-pli-unlock icon-lg icon-fw"></i> Cerrar Sesión
+                                        </a>
+                                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                            @csrf
+                                        </form>
                                     </li>
                                     
                                 </ul>
@@ -218,7 +223,30 @@
 
                                 <!--Profile Widget-->
                                 <!--================================-->
-                              
+                                    <div id="mainnav-profile" class="mainnav-profile">
+                                        <div class="profile-wrap text-center">
+                                            
+                                            <div class="pad-btm">
+                                                <img class="img-circle img-md" src="{{ asset('../storage/app/public/logos/' . basename($empresa->Logo ?? '')) }}" alt="Profile Picture">
+                                            </div>
+                                            {{$empresa->nombre ?? NULL}} 
+                                            <a href="#profile-nav" class="box-block" data-toggle="collapse" aria-expanded="false">
+                                                <span class="pull-right dropdown-toggle">
+                                                    <i class="dropdown-caret"></i>
+                                                </span>
+                                                <p class="mnp-name"> </p>
+                                                <span class="mnp-desc"> </span>
+                                            </a>
+                                        </div>
+                                        <div id="profile-nav" class="collapse list-group bg-trans">
+                                           <a class="list-group-item" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                            <i class="demo-pli-unlock icon-lg icon-fw"></i> Cerrar Sesión
+                                        </a>
+                                            <a href="{{ route('register') }}" class="list-group-item">
+                                                <i class="demo-pli-male icon-lg icon-fw"></i> Nuevos Usuario
+                                            </a>
+                                        </div>
+                                    </div>
                                 <!--Shortcut buttons-->
                                 <!--================================-->
                                 <div id="mainnav-shortcut" class="hidden">
@@ -292,19 +320,7 @@
                                         <li><a href="{{url('movimientos/index')}}">Movimientos</a></li>
                                         <li><a href="{{route('productos.index')}}">Productos /Servicio</a></li>
                                         <li class="list-divider"></li>
-                                        <li>
-                                            @php
-                                                $Operaciones = App\Models\Movimientosbasico::orderBy('id','desc')->get();
-                                            @endphp
-                                            <a href="#">Operaciones  Almacen<i class="arrow"></i></a>
-                                                
-                                            <!--Submenu-->
-                                            <ul class="collapse">
-                                                @foreach ($Operaciones as $movimiento)
-                                                    <li><a href="">{{$movimiento->Descripcion}}</a></li>
-                                                @endforeach
-                                            </ul>
-                                        </li><li class="list-divider"></li>
+                                       
                                         <li>
                                             <a href="#">Parametrizar Basicos<i class="arrow"></i></a>
 
@@ -340,6 +356,19 @@
                             </a>
                             <!--Submenu-->
                             <ul class="collapse">
+                                <li>
+                                    @php
+                                        $Operaciones = App\Models\Movimientosbasico::orderBy('id','desc')->get();
+                                    @endphp
+                                    <a href="#">Operaciones<i class="arrow"></i></a>
+                                        
+                                    <!--Submenu-->
+                                    <ul class="collapse">
+                                        @foreach ($Operaciones as $movimiento)
+                                            <li><a href="{{route('movimientos.crearPendientes',['users'=>Auth::user()->id,'caja'=>$movimiento->CajaPredeterminada ?? NULL,'TipoMovimiento' => $movimiento->id])}}">{{$movimiento->Descripcion}}</a></li>
+                                        @endforeach
+                                    </ul>
+                                </li><li class="list-divider"></li>
                                 <li><a href="{{route('impuestos.index')}}">Impuestos</a></li>   
                             </ul>
                         </li>

@@ -36,7 +36,7 @@ class Movimientosbasico extends Model
      * @var array
      */
     protected $fillable = ['Codigo','Descripcion','Descuento', 'Activo'	 ,'Pasivo'	 ,'Patrimonio'	 ,'Ingresos'	 ,'Gastos'	 , 'CostoVenta'	,  'CostoPO'	,  'Deudoras'	  ,'Acreedoras'
-    ,'Agregar','Alerta','CodigoPredetermidao','OrigenBodega','DestinoBodega','UsuarioOrigen','UsuarioDestino','TituloPiePagina','PiePagina','CuentaOrigen','CuentaSalida'];
+    ,'Agregar','Alerta','CodigoPredetermidao','CajaPredeterminada','OrigenBodega','DestinoBodega','UsuarioOrigen','UsuarioDestino','TituloPiePagina','PiePagina','CuentaOrigen','CuentaSalida'];
 
     public function codigos()
     {
@@ -55,7 +55,10 @@ class Movimientosbasico extends Model
     {
         return $this->hasMany('App\Models\Movimiento', 'TipoMovimiento_id', 'id');
     }
-
+    public function cajas()
+    {
+        return $this->hasMany('App\Models\Caja', 'CajaPredeterminada', 'id');
+    }
 
 
 }

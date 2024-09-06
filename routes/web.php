@@ -31,6 +31,7 @@ Route::get('/proveedores/BuscarProveedor', [App\Http\Controllers\ProveedoreContr
 Route::get('/buscar-cliente', [App\Http\Controllers\UsuariobasicoController::class, 'buscar'])->name('cliente.buscar');
 Route::get('/buscar-producto', [App\Http\Controllers\ProductoController::class, 'buscar'])->name('producto.buscar');
 Route::get('/buscar-cuenta', [App\Http\Controllers\CuentaController::class, 'buscar'])->name('cuenta.buscar');
+Route::post('usuarios/crears', [App\Http\Controllers\UsuariobasicoController::class, 'stores'])->name('usuariobasicos.stores');
 Route::get('/buscar-movimientos-pendiente/{caja}/{movimiento}/{users}', [App\Http\Controllers\MovimientoController::class, 'pendientes'])->name('movimientos.pendientes');
 
 Route::PATCH('/updatemovimientosbasicos/{id}', [App\Http\Controllers\MovimientosbasicoController::class, 'updates'])->name('movimientosbasicos.updates');
@@ -42,7 +43,7 @@ Route::get('/movimientosdatallados/mostrars/{id}', [App\Http\Controllers\Movimie
 Route::get('/codigos/mostrar/{id}', [App\Http\Controllers\CodigoController::class, 'mostarcodigos'])->name('codigos.mostarcodigos');
 
 
-Route::post('movimientos/crearPendientes/{users}/{caja}/{TipoMovimiento}', [App\Http\Controllers\MovimientoController::class, 'crearPendientes'])->name('movimientos.crearPendientes');
+Route::get('movimientos/crearPendientes/{users}/{caja}/{TipoMovimiento}', [App\Http\Controllers\MovimientoController::class, 'crearPendientes'])->name('movimientos.crearPendientes');
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::resource('resoluciones',App\Http\Controllers\ResolucioneController::class);
 Route::resource('familia3s',App\Http\Controllers\Familia3Controller::class);

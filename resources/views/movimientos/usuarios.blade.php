@@ -155,7 +155,7 @@
                                     <div class="form-group">
                                         <label for="estado">Estado</label>
                                         <select class="form-control" id="estado" name="estado">
-                                            <option selected="selected" value="">Estado</option>
+                                           
                                             <option value="Activo">Activo</option>
                                             <option value="Inactivo">Inactivo</option>
                                         </select>
@@ -198,24 +198,30 @@
         data[key] = value;
     });
 
-    fetch('{{ route("usuariobasicos.store") }}', {
+    fetch('{{ route("usuariobasicos.stores") }}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'X-CSRF-TOKEN': CSRF,
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
         },
         body: JSON.stringify(data)
     })
     .then(response => response.json())
     .then(data => {
-        // Handle success response
-        console.log('Success:', data.id);
-       
-        
+        var usuarios=document.getElementById('Users');
+        var textCliente= document.getElementById('buscarCliente');
+        usuarios.value = data.id; // Corregido para asignar el valor correctamente
+            
+        // Manejo de respuesta exitosa
+        console.log('Éxito:', data);
+        // Asignación del nombre completo al elemento textCliente
+        textCliente.value = `${data.Nombre1 ? data.Nombre1 : ''} ${data.Nombre2 ? data.Nombre2 : ''} ${data.Apellido1 ? data.Apellido1 : ''} ${data.Apellido2 ? data.Apellido2 : ''}`.trim();
+        // Cerrar el modal
+        $('#exampleModal').modal('hide');
     })
     .catch((error) => {
-        // Handle error response for the first request
+        // Manejo de respuesta de error para la primera solicitud
         console.error('Error:', error);
     });
 });

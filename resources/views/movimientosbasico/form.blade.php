@@ -1,5 +1,6 @@
 @php
     $codigos = App\Models\Codigo::where('estado', 'Activo')->get();
+    $caja = App\Models\Caja::where('estado', 'Activo')->pluck('Descripcion','id');
 @endphp
 
 <!-- Modal de Códigos -->
@@ -52,7 +53,7 @@
     <div class="box-body">
         <div class="row">
             <!-- Código -->
-            <div class="col-sm-4">
+            <div class="col-sm-3">
                 <div class="form-group">
                     {{ Form::label('Codigo PUC') }}
                     {{ Form::text('CodigoPredetermidao', $movimientosbasico->CodigoPredetermidao, ['class' => 'form-control' . ($errors->has('CodigoPredetermidao') ? ' is-invalid' : ''), 'placeholder' => 'CodigoPredetermidao', 'id' => 'codigo', 'readonly' => 'readonly']) }}
@@ -64,7 +65,7 @@
             </div>
             
             <!-- Descripción -->
-            <div class="col-sm-4">
+            <div class="col-sm-3">
                 <div class="form-group">
                     {{ Form::label('Descripcion') }}
                     {{ Form::text('Descripcion', $movimientosbasico->Descripcion, ['class' => 'form-control' . ($errors->has('Descripcion') ? ' is-invalid' : ''), 'placeholder' => 'Descripcion']) }}
@@ -73,14 +74,21 @@
             </div>
             
             <!-- Código Predeterminado -->
-            <div class="col-sm-4">
+            <div class="col-sm-3">
                 <div class="form-group">
                     {{ Form::label('Codigo') }}
                     {{ Form::text('Codigo', $movimientosbasico->Codigo, ['class' => 'form-control' . ($errors->has('Descripcion') ? ' is-invalid' : ''), 'placeholder' => 'Codigo']) }}
                     {!! $errors->first('Descripcion', '<div class="invalid-feedback">:message</div>') !!}
                 </div>
             </div>
-           
+            <div class="col-sm-3">
+                <div class="form-group">
+                    {{ Form::label('Caja Predeterminada') }}
+                    {{ Form::select('CajaPredeterminada', $caja,$movimientosbasico->CajaPredeterminada, ['class' => 'form-control' . ($errors->has('CajaPredeterminada') ? ' is-invalid' : ''), 'placeholder' => 'Caja Predeterminada']) }}
+                    {!! $errors->first('CajaPredeterminada', '<div class="invalid-feedback">:message</div>') !!}
+                </div>
+            </div>
+            
         </div>
         
         <div class="row">
