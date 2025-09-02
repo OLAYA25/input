@@ -19,6 +19,7 @@
                         <form method="POST" action="{{ route('bancos.store') }}"  role="form" enctype="multipart/form-data">
                             @csrf
 
+                            
                             @include('banco.form')
 
                         </form>
